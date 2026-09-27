@@ -1,0 +1,1029 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="A complete plan for hand-building and characterizing a 36-cell, 80 W solar panel as a university project.">
+<style>:root{color-scheme:light}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Hand-Built Solar Module</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@112,600;112,800;125,800&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+:root{
+  --ground:#EDF0F2;
+  --surface:#F9FAFB;
+  --sunken:#E2E7EB;
+  --ink:#0E1B2A;
+  --muted:#52627A;
+  --line:#C5CFD8;
+  --accent:#B0601C;
+  --accent-soft:#F3E3D3;
+  --cell:#1D3557;
+  --cell-line:#9FB3C8;
+  --good:#2D7A4C;
+  --danger:#AF2B22;
+  --danger-soft:#F6DEDB;
+  --label-bg:#F8F8F4;
+  --label-ink:#111418;
+  --code-bg:#0F1A27;
+  --code-ink:#DCE4EC;
+  --display:"Archivo","Arial Narrow",Arial,sans-serif;
+  --body:"Source Serif 4",Georgia,"Times New Roman",serif;
+  --mono:"JetBrains Mono",Consolas,"Courier New",monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --ground:#0A111B; --surface:#111B28; --sunken:#0D1622; --ink:#E3E8EE; --muted:#93A2B5;
+    --line:#26344A; --accent:#E38C45; --accent-soft:#2E2014; --cell:#2B4A76; --cell-line:#6F88A6;
+    --good:#5DBB84; --danger:#EE7B70; --danger-soft:#2E1614; --code-bg:#070D15;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --ground:#0A111B; --surface:#111B28; --sunken:#0D1622; --ink:#E3E8EE; --muted:#93A2B5;
+  --line:#26344A; --accent:#E38C45; --accent-soft:#2E2014; --cell:#2B4A76; --cell-line:#6F88A6;
+  --good:#5DBB84; --danger:#EE7B70; --danger-soft:#2E1614; --code-bg:#070D15;
+}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.62;padding-inline:16px;padding-block:0 64px}
+a{color:var(--accent);text-underline-offset:3px}
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+h1,h2,h3,h4{font-family:var(--display);font-stretch:112%;line-height:1.12;text-wrap:balance;margin:0}
+h2{font-size:clamp(1.6rem,3.2vw,2.1rem);font-weight:800;letter-spacing:-.01em}
+h3{font-size:1.2rem;font-weight:600;margin-top:1.8em}
+h4{font-size:1rem;font-weight:600;margin-top:1.4em}
+p,ul,ol{margin:.7em 0}
+li{margin:.3em 0}
+code,kbd{font-family:var(--mono);font-size:.84em;background:var(--sunken);padding:.1em .35em;border-radius:3px}
+.eyebrow{font-family:var(--mono);font-size:.74rem;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);font-weight:600}
+.muted{color:var(--muted)}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+
+/* ---------- shell ---------- */
+.shell{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:1fr;gap:40px}
+@media (min-width:1020px){.shell{grid-template-columns:220px minmax(0,1fr)}}
+.toc{display:none}
+@media (min-width:1020px){
+  .toc{display:block;position:sticky;top:calc(env(safe-area-inset-top,0px) + 24px);align-self:start;padding-top:32px;font-family:var(--display);font-stretch:112%;font-size:.9rem}
+  .toc ol{list-style:none;padding:0;margin:12px 0 0;display:grid;gap:2px}
+  .toc a{display:block;padding:5px 10px;border-left:2px solid var(--line);color:var(--muted);text-decoration:none}
+  .toc a:hover{color:var(--ink);border-left-color:var(--ink)}
+  .toc a.active{color:var(--accent);border-left-color:var(--accent)}
+}
+main{min-width:0;max-width:800px}
+section{padding-top:56px;scroll-margin-top:16px}
+section>h2{margin-bottom:.5em}
+.lede{font-size:1.1rem}
+
+/* ---------- hero ---------- */
+.hero{padding-top:40px;display:grid;gap:32px;grid-template-columns:1fr;align-items:start}
+@media (min-width:760px){.hero{grid-template-columns:minmax(0,1.25fr) minmax(0,1fr)}}
+.hero h1{font-size:clamp(2.3rem,6vw,3.6rem);font-weight:800;font-stretch:125%;letter-spacing:-.02em;margin:.25em 0 .35em}
+.hero h1 span{color:var(--accent)}
+.facts{display:flex;flex-wrap:wrap;gap:8px 20px;margin-top:18px;font-family:var(--display);font-stretch:112%;font-size:.92rem}
+.facts div{display:flex;flex-direction:column}
+.facts b{font-size:1.35rem;font-weight:800}
+.facts small{color:var(--muted);font-size:.78rem;letter-spacing:.06em;text-transform:uppercase}
+
+.strip{display:grid;grid-template-columns:repeat(9,1fr);gap:3px;margin-top:26px;max-width:100%}
+.strip i{aspect-ratio:1/2;background:var(--cell);border-radius:2px;position:relative;
+  background-image:repeating-linear-gradient(90deg,transparent 0 17%,var(--cell-line) 17% 19%);}
+.strip i::after{content:"";position:absolute;inset:auto -3px 48% -3px;height:2px;background:var(--accent);opacity:.85}
+
+.plate{background:var(--label-bg);color:var(--label-ink);border:1px solid #9aa3ad;border-radius:4px;padding:18px 20px;font-family:var(--display);font-stretch:112%;box-shadow:0 1px 0 rgba(0,0,0,.05),0 12px 28px -18px rgba(10,20,40,.45)}
+.plate header{display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid var(--label-ink);padding-bottom:8px;margin-bottom:6px}
+.plate header b{font-size:1.05rem;font-weight:800;letter-spacing:.02em}
+.plate header span{font-family:var(--mono);font-size:.72rem}
+.plate table{width:100%;border-collapse:collapse;font-size:.92rem}
+.plate td{padding:4px 0;border-bottom:1px dotted #aab2bb}
+.plate td:last-child{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums;font-weight:600}
+.plate .fine{font-family:var(--mono);font-size:.68rem;line-height:1.45;margin:10px 0 0;color:#3d4550}
+.plate .warn{display:flex;gap:8px;align-items:center;margin-top:10px;font-size:.76rem;font-weight:600;border:1.5px solid var(--label-ink);padding:5px 8px}
+.plate .warn svg{flex:none}
+
+/* ---------- blocks ---------- */
+.callout{border-left:3px solid var(--accent);background:var(--accent-soft);padding:12px 16px;margin:1.2em 0;border-radius:0 4px 4px 0}
+.callout.danger{border-left-color:var(--danger);background:var(--danger-soft)}
+.callout p{margin:.3em 0}
+.callout strong:first-child{font-family:var(--display);font-stretch:112%}
+.tracks{display:grid;gap:16px;grid-template-columns:1fr;margin-top:1.2em}
+@media (min-width:640px){.tracks{grid-template-columns:1fr 1fr}}
+.track{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:16px 18px}
+.track h3{margin-top:.2em}
+.track .tag{font-family:var(--mono);font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+
+.tablewrap{overflow-x:auto;margin:1em 0;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
+table.data{width:100%;border-collapse:collapse;font-size:.92rem;min-width:520px}
+table.data th{font-family:var(--display);font-stretch:112%;font-weight:600;text-align:left;font-size:.8rem;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);padding:10px 12px;border-bottom:1px solid var(--line);background:var(--sunken)}
+table.data td{padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+table.data tr:last-child td{border-bottom:0}
+table.data td.r,table.data th.r{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+
+.formula{font-family:var(--mono);background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:12px 16px;font-size:.9rem;overflow-x:auto;white-space:pre;line-height:1.7}
+
+/* steps */
+.steps{list-style:none;padding:0;margin:1.4em 0 0;counter-reset:step;display:grid;gap:26px}
+.steps>li{counter-increment:step;display:grid;grid-template-columns:44px minmax(0,1fr);gap:0 16px;margin:0}
+.steps>li::before{content:counter(step,decimal-leading-zero);font-family:var(--display);font-stretch:125%;font-weight:800;font-size:1.5rem;color:var(--accent);line-height:1.1}
+.steps h3{margin:0 0 .2em}
+.steps ul{padding-left:1.1em}
+.check{font-family:var(--mono);font-size:.82rem;color:var(--good);margin-top:.5em}
+.check::before{content:"PASS CHECK  ";font-weight:600}
+
+/* figures */
+figure{margin:1.4em 0;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:14px}
+figure .scroll{overflow-x:auto}
+figcaption{font-size:.85rem;color:var(--muted);margin-top:8px}
+svg text{font-family:var(--mono)}
+
+/* tools */
+.tool{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:18px;margin:1.4em 0}
+.tool-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+.tool-head h3{margin:0}
+.controls{display:grid;gap:12px 20px;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));margin-bottom:14px}
+.controls label{display:flex;flex-direction:column;gap:4px;font-family:var(--display);font-stretch:112%;font-size:.84rem;color:var(--muted)}
+.controls output{font-family:var(--mono);color:var(--ink);font-size:.9rem}
+input[type=range]{width:100%;accent-color:var(--accent)}
+select{font:inherit;font-family:var(--body);color:var(--ink);background:var(--ground);border:1px solid var(--line);border-radius:4px;padding:5px 8px}
+.readout{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:4px;overflow:hidden;margin-top:12px}
+.readout div{background:var(--surface);padding:8px 10px;display:flex;flex-direction:column}
+.readout small{font-family:var(--display);font-stretch:112%;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.readout b{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:1.02rem}
+.readout .ok{color:var(--good)} .readout .bad{color:var(--danger)}
+.chartwrap{overflow-x:auto}
+#ivchart{width:100%;min-width:480px;height:auto;display:block}
+
+.bom-total{display:flex;flex-wrap:wrap;gap:6px 22px;align-items:baseline;margin-top:12px;font-family:var(--display);font-stretch:112%}
+.bom-total b{font-family:var(--mono);font-size:1.3rem}
+.bom-cat td{background:var(--sunken);font-family:var(--display);font-stretch:112%;font-weight:600;font-size:.82rem;letter-spacing:.05em;text-transform:uppercase}
+table.data input[type=checkbox]{accent-color:var(--accent);width:17px;height:17px}
+tr.off td{color:var(--muted)} tr.off td .nm{text-decoration:line-through}
+
+/* code */
+.code{position:relative;margin:1em 0}
+.code pre{background:var(--code-bg);color:var(--code-ink);border-radius:6px;padding:16px;overflow-x:auto;font-family:var(--mono);font-size:.8rem;line-height:1.55;margin:0}
+.code .c{color:#7F93A8}
+.code button{position:absolute;top:8px;right:8px;font-family:var(--display);font-stretch:112%;font-size:.75rem;background:#22334a;color:#DCE4EC;border:1px solid #33475f;border-radius:4px;padding:3px 9px;cursor:pointer}
+.code button:hover{background:#2c405a}
+
+/* timeline */
+.weeks{display:grid;gap:0;margin-top:1em;border-left:2px solid var(--line);padding-left:0}
+.week{position:relative;padding:0 0 18px 22px}
+.week::before{content:"";position:absolute;left:-7px;top:7px;width:12px;height:12px;border-radius:50%;background:var(--surface);border:2px solid var(--accent)}
+.week b{font-family:var(--display);font-stretch:112%;font-weight:800}
+.week .when{font-family:var(--mono);font-size:.75rem;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;display:block}
+
+.resume{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:16px 20px}
+.resume li{margin:.55em 0}
+.ph{background:var(--accent-soft);color:var(--accent);font-family:var(--mono);font-size:.86em;padding:0 .25em;border-radius:3px}
+
+footer{margin-top:64px;padding-top:18px;border-top:1px solid var(--line);font-size:.85rem;color:var(--muted)}
+
+@media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <nav class="toc" aria-label="Guide sections">
+    <span class="eyebrow">Build guide</span>
+    <ol>
+      <li><a href="#overview">Scope</a></li>
+      <li><a href="#physics">How a panel works</a></li>
+      <li><a href="#design">Electrical design</a></li>
+      <li><a href="#bom">Parts &amp; budget</a></li>
+      <li><a href="#safety">Tools &amp; safety</a></li>
+      <li><a href="#build">Build procedure</a></li>
+      <li><a href="#test">Test &amp; characterize</a></li>
+      <li><a href="#troubleshoot">Troubleshooting</a></li>
+      <li><a href="#dssc">Optional: make a cell</a></li>
+      <li><a href="#plan">8-week plan</a></li>
+      <li><a href="#resume">Report &amp; résumé</a></li>
+      <li><a href="#sources">Sources</a></li>
+    </ol>
+  </nav>
+
+<main>
+  <header class="hero">
+    <div>
+      <span class="eyebrow">University project · Photovoltaics</span>
+      <h1>Build an <span>80&nbsp;W</span> solar panel from bare cells</h1>
+      <p class="lede">A complete plan for hand-building a 36-cell monocrystalline module on a student budget: design it, solder it, seal it, then measure it with an I–V curve tracer you also build. The result is a panel that can charge a 12&nbsp;V battery and a data set you can defend in an interview.</p>
+      <div class="facts">
+        <div><small>Budget</small><b class="num">≈ $150</b></div>
+        <div><small>Duration</small><b>8 weeks</b></div>
+        <div><small>Build time</small><b>≈ 30 hours</b></div>
+        <div><small>Skills</small><b>Solder · measure</b></div>
+      </div>
+      <div class="strip" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+    </div>
+    <aside class="plate" aria-label="Design target nameplate">
+      <header><b>MODULE DESIGN TARGET</b><span>DIY-36M-HC</span></header>
+      <table>
+        <tr><td>Max power (P<sub>max</sub>)</td><td>75–85 W</td></tr>
+        <tr><td>Open-circuit voltage (V<sub>oc</sub>)</td><td>≈ 24 V</td></tr>
+        <tr><td>Short-circuit current (I<sub>sc</sub>)</td><td>≈ 4.7 A</td></tr>
+        <tr><td>Voltage at P<sub>max</sub> (V<sub>mp</sub>)</td><td>≈ 20 V</td></tr>
+        <tr><td>Current at P<sub>max</sub> (I<sub>mp</sub>)</td><td>≈ 4.3 A</td></tr>
+        <tr><td>Cells</td><td>36 half-cut mono, series</td></tr>
+        <tr><td>Bypass diodes</td><td>2 × 15 A Schottky</td></tr>
+        <tr><td>Size</td><td>≈ 790 × 715 mm</td></tr>
+      </table>
+      <p class="fine">Targets at STC: 1000 W/m², AM1.5 spectrum, 25 °C cell temperature. Based on 156.75 × 78.4 mm PERC half-cells; your cells' datasheet sets the real numbers.</p>
+      <div class="warn"><svg width="18" height="16" viewBox="0 0 18 16" aria-hidden="true"><path d="M9 1 17 15H1Z" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M9 6v4.5M9 12.2v1" stroke="currentColor" stroke-width="1.6"/></svg>Live whenever lit. Cover before wiring.</div>
+    </aside>
+  </header>
+
+  <!-- ================= SCOPE ================= -->
+  <section id="overview">
+    <span class="eyebrow">Scope</span>
+    <h2>What “from scratch” means here</h2>
+    <p>Making crystalline silicon cells needs a clean-room furnace, so no one builds a practical panel from raw silicon at home. What you <em>can</em> do, and what real module factories do, is start from individual bare cells and turn them into a working, weatherproof module. That's the main track. If you want to claim you made the photovoltaic material itself, there's an optional side experiment for that.</p>
+    <div class="tracks">
+      <div class="track">
+        <span class="tag">Main track · required</span>
+        <h3>Module assembly</h3>
+        <p>Buy 36 bare silicon cells and build the full module: tabbing, stringing, busing, bypass diodes, junction box, encapsulation and frame. Then characterize it against your design.</p>
+      </div>
+      <div class="track">
+        <span class="tag">Side track · optional</span>
+        <h3>Dye-sensitized cell</h3>
+        <p>Make a Grätzel cell from titanium dioxide, berry juice and iodide electrolyte. It's tiny and inefficient (well under 1%), but it's a photovoltaic device you truly fabricated. <a href="#dssc">Details below.</a></p>
+      </div>
+    </div>
+    <div class="callout">
+      <p><strong>Be honest about cost.</strong> A commercial 100 W panel costs less than this build. The value of the project is the engineering and the data, not the savings. Say so in your report. Reviewers respect it, and it shows you understand the industry.</p>
+    </div>
+  </section>
+
+  <!-- ================= PHYSICS ================= -->
+  <section id="physics">
+    <span class="eyebrow">Background</span>
+    <h2>How a panel works, in five facts</h2>
+    <ol>
+      <li><strong>A cell is a large diode.</strong> A silicon wafer with a p–n junction. Light frees electrons, and the junction's built-in field pushes them out through the metal fingers and busbars.</li>
+      <li><strong>Each cell gives about 0.6 V</strong> no matter how big it is (≈ 0.68 V open-circuit, ≈ 0.56 V at max power for modern PERC). <strong>Size sets current</strong>: bigger cell, more amps.</li>
+      <li><strong>Cells in series add voltage.</strong> A 12 V battery needs roughly 14.4 V to charge, and a hot panel loses voltage, so 12 V panels use 36 cells: ≈ 20 V at max power when cool, still above 15 V when hot.</li>
+      <li><strong>A series string is only as strong as its weakest cell.</strong> One shaded or cracked cell limits the whole string's current and can overheat (a <em>hot spot</em>). Bypass diodes let current route around a bad group of cells.</li>
+      <li><strong>Heat costs power.</strong> Crystalline silicon loses about 0.35–0.45% of its power for every °C above 25 °C. A panel at 60 °C on a summer roof makes roughly 13% less than its label.</li>
+    </ol>
+
+    <div class="tool" id="iv-tool">
+      <div class="tool-head"><h3>I–V curve explorer</h3><span class="muted" style="font-size:.85rem">Drag the sliders to see why the design is 36 cells</span></div>
+      <div class="controls">
+        <label for="cellType">Cell type
+          <select id="cellType">
+            <option value="156">156.75 mm half-cut (M2)</option>
+            <option value="166">166 mm half-cut (M6)</option>
+            <option value="182">182 mm half-cut (M10)</option>
+          </select>
+        </label>
+        <label for="ns">Cells in series <output id="nsOut">36</output>
+          <input type="range" id="ns" min="18" max="72" step="2" value="36">
+        </label>
+        <label for="irr">Irradiance <output id="irrOut">1000 W/m²</output>
+          <input type="range" id="irr" min="100" max="1100" step="50" value="1000">
+        </label>
+        <label for="temp">Cell temperature <output id="tempOut">25 °C</output>
+          <input type="range" id="temp" min="0" max="75" step="5" value="25">
+        </label>
+      </div>
+      <div class="chartwrap"><svg id="ivchart" viewBox="0 0 640 330" role="img" aria-label="Current–voltage and power–voltage curves for the configured panel"></svg></div>
+      <div class="readout" id="ivReadout"></div>
+      <p class="muted" style="font-size:.84rem;margin-bottom:0">Single-diode model (ideality 1.2, small series resistance), typical PERC coefficients. Hand-built modules usually land 5–15% below the ideal because of front-sheet reflection and solder-joint resistance.</p>
+    </div>
+  </section>
+
+  <!-- ================= DESIGN ================= -->
+  <section id="design">
+    <span class="eyebrow">Design</span>
+    <h2>Electrical and mechanical design</h2>
+    <p>The reference design uses 156.75 × 78.4 mm half-cut mono PERC cells with <strong>3 to 5 busbars</strong>. Avoid 9-busbar and “MBB” multi-wire cells: their thin busbars are very hard to solder by hand. If you can only find 166 or 182 mm half-cells, the design still works. Set the explorer above to your cell to get the new current, power and size.</p>
+
+    <div class="tablewrap"><table class="data">
+      <thead><tr><th>Parameter</th><th class="r">Per cell</th><th class="r">36 in series</th><th>Why it matters</th></tr></thead>
+      <tbody>
+        <tr><td>V<sub>oc</sub></td><td class="r">0.675 V</td><td class="r">≈ 24.3 V</td><td>Max voltage your charge controller and tracer must accept</td></tr>
+        <tr><td>V<sub>mp</sub></td><td class="r">≈ 0.56 V</td><td class="r">≈ 20 V</td><td>Must stay above ≈ 15 V when hot to charge a 12 V battery</td></tr>
+        <tr><td>I<sub>sc</sub></td><td class="r">4.75 A</td><td class="r">4.75 A</td><td>Sets fuse, wire and diode ratings (use ≥ 1.25 × I<sub>sc</sub>)</td></tr>
+        <tr><td>P<sub>max</sub></td><td class="r">≈ 2.6 W</td><td class="r">≈ 94 W ideal</td><td>Expect 75–85 W after hand-build losses</td></tr>
+        <tr><td>Area</td><td class="r">0.0123 m²</td><td class="r">0.442 m²</td><td>Used for efficiency calculations</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3>Layout: 4 rows of 9, wired as a serpentine</h3>
+    <p>Cells in a row connect front-to-back. Each row turns around at the end and runs back the other way. With an even number of rows, both output leads end up on the same edge, right next to the junction box. So does the midpoint tap that the bypass diodes need.</p>
+    <figure>
+      <div class="scroll"><svg id="layout" viewBox="0 0 700 420" style="width:100%;min-width:520px;height:auto" role="img" aria-label="Module layout: four rows of nine cells in a serpentine series string, with two bypass diodes in the junction box"></svg></div>
+      <figcaption>Current path in orange. Diode D1 bridges rows 1–2 (18 cells) and D2 bridges rows 3–4. Each diode's cathode (bar) faces the positive end of its group. Sizes in mm for 156.75 half-cells: 2 mm gap between cells in a row, 8 mm between rows, 30 mm border.</figcaption>
+    </figure>
+
+    <h3>Encapsulation choice</h3>
+    <p>This decision affects the project more than any other. Factories laminate cells in EVA film under vacuum at about 145 °C. You probably can't do that, so choose deliberately and explain the trade-off in your report.</p>
+    <div class="tablewrap"><table class="data">
+      <thead><tr><th>Method</th><th>How</th><th>Pros</th><th>Cons</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Sealed sandwich</strong> (recommended)</td><td>Cells float on a backing board, held by one dab of silicone each. Clear front sheet, perimeter sealed with butyl tape and silicone, framed.</td><td>Cheap, reversible, no special tools. A cracked cell can be replaced before final sealing.</td><td>The air gap adds two reflecting surfaces (≈ 8% optical loss). It can fog if moisture gets in.</td></tr>
+        <tr><td>EVA vacuum-bag lamination</td><td>Glass / EVA / cells / EVA / backsheet in a vacuum bag, cured in a lab oven at ≈ 145 °C.</td><td>The industry method. Best optics and durability. Strong résumé story.</td><td>Needs a big enough oven and a vacuum pump. Real risk of cracking cells.</td></tr>
+        <tr><td>Resin potting</td><td>Pour clear epoxy or resin over the cells.</td><td>Looks finished.</td><td>Epoxy yellows in UV and cracks cells as it shrinks. <strong>Avoid.</strong></td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <!-- ================= BOM ================= -->
+  <section id="bom">
+    <span class="eyebrow">Parts &amp; budget</span>
+    <h2>Bill of materials</h2>
+    <p>Prices are 2026 US estimates from online sellers and hardware stores, and they vary a lot by region. Untick anything you already own or can borrow from a university lab. Your ticks are saved in this browser.</p>
+
+    <div class="tool" style="padding:0;overflow:hidden">
+      <div class="tablewrap" style="margin:0;border:0;border-radius:0">
+        <table class="data" id="bomTable">
+          <thead><tr><th style="width:44px">Buy</th><th>Item</th><th>Spec / buying notes</th><th class="r">Low</th><th class="r">High</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div style="padding:14px 18px;border-top:1px solid var(--line)">
+        <div class="bom-total" id="bomTotal"></div>
+      </div>
+    </div>
+
+    <h3>Buying tips that save money and pain</h3>
+    <ul>
+      <li><strong>Order cells first.</strong> Cells from overseas sellers can take 2–4 weeks to arrive. Kits that bundle cells, tabbing ribbon, bus ribbon and a flux pen are usually the cheapest option.</li>
+      <li><strong>Buy about 15% spare cells.</strong> You will break some. Everyone does. B-grade cells (cosmetic flaws) are fine for this project. Just measure and sort them.</li>
+      <li><strong>Silicone must be “neutral cure”.</strong> Common acetoxy silicone smells of vinegar and releases acetic acid, which corrodes cell metallization. Check the tube's label.</li>
+      <li><strong>Use UV-stabilized polycarbonate or glass</strong> for the front. Plain acrylic works but yellows and scratches. A salvaged tempered-glass shower door or table top is a classic free source if the size fits.</li>
+      <li><strong>Ask your department.</strong> Most engineering labs lend soldering stations, multimeters, a bench power supply, a heat gun and a drill. That takes the tools off your budget entirely.</li>
+    </ul>
+  </section>
+
+  <!-- ================= SAFETY ================= -->
+  <section id="safety">
+    <span class="eyebrow">Before you start</span>
+    <h2>Tools and safety</h2>
+    <h3>Tools (borrow where you can)</h3>
+    <ul>
+      <li>Temperature-controlled soldering station, 60 W or more, with a 2–3 mm chisel tip</li>
+      <li>Digital multimeter (DC 10 A range) and, ideally, a DC clamp meter</li>
+      <li>Heat-resistant flat work surface: a silicone mat on a sheet of MDF or glass</li>
+      <li>Cutting jig for ribbon (a strip of wood with a stop block), flush cutters, steel ruler</li>
+      <li>Drill, pop-rivet tool, hacksaw or mitre saw for the aluminium frame</li>
+      <li>Infrared thermometer (for hot-spot checks and the temperature correction)</li>
+    </ul>
+
+    <div class="callout danger">
+      <p><strong>Electrical.</strong> The finished panel makes about 24 V DC and nearly 5 A. That's below the shock threshold, but it's enough to arc and burn at a loose connection. <strong>A panel is live whenever light hits it.</strong> Cover it with a blanket or cardboard before touching wiring.</p>
+      <p><strong>Fumes and lead.</strong> Tabbing ribbon is usually coated in tin–lead solder. Solder under fume extraction, don't eat at the bench, and wash your hands after each session.</p>
+      <p><strong>Glass and cells.</strong> Cells are about 0.18 mm thick and break with razor edges. Glass edges cut. Wear safety glasses when cutting ribbon, frame or glass.</p>
+      <p><strong>Heat.</strong> The tracer's MOSFET gets hot during sweeps, and so does a panel in the sun. Never leave a panel short-circuited and unattended in full sun if a cell is cracked, because it can form a hot spot.</p>
+    </div>
+  </section>
+
+  <!-- ================= BUILD ================= -->
+  <section id="build">
+    <span class="eyebrow">Procedure</span>
+    <h2>Build procedure</h2>
+    <p>Each stage ends with a pass check. Don't move on until it passes. A fault found at step 3 takes minutes to fix. The same fault found after sealing costs you the panel.</p>
+
+    <ol class="steps">
+      <li><div>
+        <h3>Inspect, measure and sort every cell</h3>
+        <ul>
+          <li>Check each cell against a bright light for cracks, chipped edges and snail trails. Put cracked cells in a separate box. They make good practice pieces.</li>
+          <li>Measure every cell's short-circuit current under the <em>same</em> light: outdoors in steady sun, or under a halogen work lamp at a fixed distance. Clip the multimeter's 10 A leads directly to the front (−) and back (+) contacts.</li>
+          <li>Number the cells on masking tape and log them in a spreadsheet. Sort them into bins within ±3% current and build the panel from one bin. The whole string runs at the weakest cell's current.</li>
+          <li><strong>Check polarity.</strong> On standard p-type PERC cells the <em>front</em> is negative. Many n-type (TOPCon) cells are the reverse. Confirm with the meter.</li>
+        </ul>
+        <p class="check">All 36 chosen cells within ±3% I<sub>sc</sub>, no visible cracks, results logged.</p>
+      </div></li>
+
+      <li><div>
+        <h3>Make a layout jig and practise</h3>
+        <ul>
+          <li>Draw the full 4 × 9 layout at 1:1 on the backing board, or on a sheet of MDF you'll use as a template. Mark the 2 mm cell gaps and 8 mm row gaps.</li>
+          <li>Cut 180 tabbing ribbons (36 cells × 5 busbars) to ≈ 150 mm: just under two cell lengths plus the gap. A stop-block jig makes them identical.</li>
+          <li>Practise on broken cells until your joints are smooth and silver. Set the iron to ≈ 330–360 °C.</li>
+        </ul>
+        <p class="check">Your practice joints hold when you tug on the ribbon, and the cell doesn't crack.</p>
+      </div></li>
+
+      <li><div>
+        <h3>Tab the cells</h3>
+        <ul>
+          <li>Run the flux pen along each front busbar. Lay a ribbon on the busbar with its long overhang past one edge, always the same edge.</li>
+          <li>Solder in one steady stroke along the busbar, pressing the ribbon down with a wooden stick ahead of the tip. The ribbon's coating is the solder, so don't add more. Don't linger. Heat builds up and cracks cells.</li>
+          <li>Tab all 36 cells before stringing. Let each one cool flat on the mat.</li>
+        </ul>
+        <p class="check">Re-measure I<sub>sc</sub> on 5 random tabbed cells. They should be within 2% of their earlier readings. A big drop means a crack.</p>
+      </div></li>
+
+      <li><div>
+        <h3>String the cells into rows</h3>
+        <ul>
+          <li>Place cells face-down in the jig. Each cell's ribbon overhang lies across the back contacts of the next cell in the row. Flux the back pads and solder the ribbons down.</li>
+          <li>Build four rows of 9. Flip rows 2 and 4 around so the serpentine works: rows 1 and 3 run left to right, rows 2 and 4 right to left.</li>
+          <li>Keep the 2 mm gap. Cells that touch can short or crack as they expand in the heat.</li>
+        </ul>
+        <p class="check">Each row in sunlight reads V<sub>oc</sub> ≈ 5.7–6.1 V (9 × ≈ 0.65 V) and I<sub>sc</sub> close to a single cell's.</p>
+      </div></li>
+
+      <li><div>
+        <h3>Bus the rows together and bring out three leads</h3>
+        <ul>
+          <li>Carefully turn the rows face-up onto the backing board. Solder wide bus ribbon across the row ends to join row 1→2 (right edge), 2→3 (left edge) and 3→4 (right edge).</li>
+          <li>On the left edge, bring out three bus ribbons through slots in the backing: <strong>A</strong> (start of row 1), <strong>B</strong> (the row 2/3 junction) and <strong>C</strong> (end of row 4).</li>
+          <li>Slip Kapton tape or a strip of backsheet under any bus ribbon that crosses over a cell of different polarity.</li>
+          <li>Fix each cell to the backing with one pea-sized dab of neutral-cure silicone at its centre. That lets the cells expand without cracking.</li>
+        </ul>
+        <p class="check">Across A–C in sun: V<sub>oc</sub> ≈ 22–24.5 V. Across A–B and B–C: each ≈ half of that.</p>
+      </div></li>
+
+      <li><div>
+        <h3>Fit bypass diodes and the junction box</h3>
+        <ul>
+          <li>Glue a junction box over the three leads on the back. Solder or clamp A, B and C to its terminals.</li>
+          <li>Fit D1 across A–B and D2 across B–C, with each diode's <strong>cathode (bar) toward the positive end</strong> of its group. Use 15 A Schottky diodes such as 15SQ045. In the dark they don't conduct. When part of the panel is shaded they carry current around it.</li>
+          <li>Attach the MC4 output leads with 4 mm² (12 AWG) solar cable. Mark + and −.</li>
+        </ul>
+        <p class="check">Shade one row completely with cardboard. The output drops by about half the voltage instead of collapsing. That's the diode working.</p>
+      </div></li>
+
+      <li><div>
+        <h3>Full electrical test before sealing</h3>
+        <ul>
+          <li>With the front sheet laid loosely on top, run a full I–V sweep with your tracer (see <a href="#test">Test</a>). This is your “pre-lamination” baseline.</li>
+          <li>Check every joint again with the panel lit and look for hot cells with the IR thermometer while short-circuited for about 30 s. A cell more than 10 °C hotter than its neighbours is cracked or badly soldered. Replace it now.</li>
+        </ul>
+        <p class="check">P<sub>max</sub> within about 10% of the explorer's prediction for the measured irradiance. No hot spots.</p>
+      </div></li>
+
+      <li><div>
+        <h3>Encapsulate and frame</h3>
+        <ul>
+          <li>Clean the inside of the front sheet with isopropyl alcohol. Run butyl tape around the perimeter of the backing as a spacer and moisture barrier. Tuck desiccant sachets into the border outside the cell area.</li>
+          <li>Lower the front sheet onto the butyl and press it down evenly.</li>
+          <li>Cut the aluminium angle with 45° mitres. Fill the channel with neutral-cure silicone, slide it over the edge sandwich and rivet the corners.</li>
+          <li>Run a final bead of silicone along every seam, and around the junction box and cable glands.</li>
+        </ul>
+        <p class="check">After 24 h curing, the panel survives a hose-down test with no water inside and no fogging after a day in the sun.</p>
+      </div></li>
+
+      <li><div>
+        <h3>Label it</h3>
+        <ul>
+          <li>Make a real nameplate for the back with your <em>measured</em> STC-corrected values, polarity marks and a “live when lit” warning. It looks professional in photos and on a poster.</li>
+        </ul>
+      </div></li>
+    </ol>
+  </section>
+
+  <!-- ================= TEST ================= -->
+  <section id="test">
+    <span class="eyebrow">Measurement</span>
+    <h2>Test and characterize</h2>
+    <p>This section is what turns a craft project into an engineering project. Building a panel is common. Building your own instrument, measuring the panel properly and explaining where the missing watts went is what stands out.</p>
+
+    <h3>The I–V curve tracer</h3>
+    <p>An Arduino steps a 12-bit DAC that drives a logic-level MOSFET's gate. The MOSFET acts as a variable load, sweeping the panel from open circuit to short circuit in about a second. An INA226 sensor records voltage and current at each step.</p>
+    <figure>
+      <div class="scroll">
+      <svg viewBox="0 0 680 250" style="width:100%;min-width:560px;height:auto" role="img" aria-label="Tracer wiring: panel positive through fuse to INA226 shunt then MOSFET drain; MOSFET source to panel negative; DAC drives gate; Arduino talks to DAC and INA226 over I2C">
+        <g fill="none" stroke="var(--ink)" stroke-width="1.6">
+          <rect x="20" y="70" width="100" height="110" rx="4" fill="var(--sunken)"/>
+          <rect x="180" y="40" width="70" height="36" rx="4" fill="var(--surface)"/>
+          <rect x="300" y="30" width="140" height="56" rx="4" fill="var(--surface)"/>
+          <rect x="490" y="30" width="150" height="120" rx="4" fill="var(--surface)"/>
+          <rect x="300" y="170" width="140" height="56" rx="4" fill="var(--surface)"/>
+          <rect x="130" y="170" width="120" height="56" rx="4" fill="var(--surface)"/>
+        </g>
+        <g stroke="var(--accent)" stroke-width="2.4" fill="none">
+          <path d="M120 95 H150 V58 H180"/><path d="M250 58 H300"/><path d="M440 58 H490"/>
+          <path d="M565 150 V238 H70 V180"/>
+        </g>
+        <g stroke="var(--muted)" stroke-width="1.6" fill="none" stroke-dasharray="5 4">
+          <path d="M370 170 V86"/><path d="M440 198 H520 V150"/><path d="M300 198 H250"/>
+        </g>
+        <g font-size="12" fill="var(--ink)">
+          <text x="70" y="118" text-anchor="middle" font-weight="600">PANEL</text>
+          <text x="70" y="136" text-anchor="middle">24 V · 5 A</text>
+          <text x="128" y="90">+</text><text x="75" y="198">−</text>
+          <text x="215" y="63" text-anchor="middle">FUSE 7.5A</text>
+          <text x="370" y="54" text-anchor="middle" font-weight="600">INA226</text>
+          <text x="370" y="72" text-anchor="middle">0.01 Ω shunt</text>
+          <text x="565" y="68" text-anchor="middle" font-weight="600">IRLZ44N</text>
+          <text x="565" y="86" text-anchor="middle">on heatsink</text>
+          <text x="500" y="52">D</text><text x="572" y="140">S</text><text x="526" y="140">G</text>
+          <text x="370" y="194" text-anchor="middle" font-weight="600">MCP4725 DAC</text>
+          <text x="370" y="212" text-anchor="middle">0–5 V gate drive</text>
+          <text x="190" y="194" text-anchor="middle" font-weight="600">ARDUINO</text>
+          <text x="190" y="212" text-anchor="middle">USB → laptop</text>
+          <text x="376" y="130" fill="var(--muted)">I²C</text>
+          <text x="258" y="190" fill="var(--muted)">I²C</text>
+          <text x="455" y="190" fill="var(--muted)">100 Ω → gate</text>
+        </g>
+      </svg>
+      </div>
+      <figcaption>Orange carries the panel's power; dashed lines are signals. All grounds are common: panel −, MOSFET source, Arduino GND, DAC GND, INA226 GND. Add a 100 kΩ resistor from gate to source so the MOSFET stays off if the DAC resets. The INA226 module usually ships with a 0.1 Ω (R100) shunt that tops out at 0.8 A. Replace it with a 0.01 Ω, 2 W+ shunt.</figcaption>
+    </figure>
+
+    <h4>Arduino sketch</h4>
+    <p>Install <a href="https://github.com/RobTillaart/INA226" target="_blank" rel="noopener">RobTillaart/INA226</a> and <a href="https://github.com/adafruit/Adafruit_MCP4725" target="_blank" rel="noopener">Adafruit_MCP4725</a> from the Library Manager.</p>
+    <div class="code"><button type="button" data-copy="arduinoCode">Copy</button><pre id="arduinoCode"><span class="c">// I-V curve tracer: an MCP4725 DAC drives an IRLZ44N as a variable load,
+// an INA226 measures panel voltage and current. Send 's' over Serial to sweep.</span>
+#include &lt;Wire.h&gt;
+#include &lt;INA226.h&gt;
+#include &lt;Adafruit_MCP4725.h&gt;
+
+INA226 ina(0x40);
+Adafruit_MCP4725 dac;
+
+const float SHUNT_OHMS = 0.010;   <span class="c">// the 0.01 ohm shunt you fitted</span>
+const float MAX_AMPS   = 8.0;
+const int   STEP       = 8;       <span class="c">// DAC codes per step: up to 512 points</span>
+
+void setup() {
+  Serial.begin(115200);
+  Wire.begin();
+  dac.begin(0x60);
+  dac.setVoltage(0, false);       <span class="c">// gate low = MOSFET off = open circuit</span>
+  if (!ina.begin()) { Serial.println("INA226 not found"); while (1); }
+  ina.setMaxCurrentShunt(MAX_AMPS, SHUNT_OHMS);
+  Serial.println("Ready. Send 's' to sweep.");
+}
+
+void sweep() {
+  Serial.println("volts,amps");
+  for (int code = 0; code &lt; 4096; code += STEP) {
+    dac.setVoltage(code, false);
+    delay(2);                     <span class="c">// let the load and the INA226 settle</span>
+    float v = ina.getBusVoltage();
+    float i = ina.getCurrent();
+    Serial.print(v, 3); Serial.print(','); Serial.println(i, 3);
+    if (v &lt; 0.2) break;           <span class="c">// reached short circuit</span>
+  }
+  dac.setVoltage(0, false);       <span class="c">// back to open circuit so the MOSFET cools</span>
+  Serial.println("done");
+}
+
+void loop() {
+  if (Serial.available() &amp;&amp; Serial.read() == 's') sweep();
+}</pre></div>
+
+    <h4>Python logger and analysis</h4>
+    <p>Needs <code>pip install pyserial numpy matplotlib</code>. It runs one sweep, prints the key parameters, and saves a CSV and a plot for your report.</p>
+    <div class="code"><button type="button" data-copy="pyCode">Copy</button><pre id="pyCode"><span class="c"># Run one I-V sweep on the tracer and report the module's key parameters.
+# Usage: python sweep.py COM5</span>
+import sys, time
+import numpy as np
+import matplotlib.pyplot as plt
+import serial
+
+PORT = sys.argv[1] if len(sys.argv) &gt; 1 else "COM5"
+MODULE_AREA = 0.565   <span class="c"># m², outer frame dimensions</span>
+CELL_AREA = 0.442     <span class="c"># m², 36 x cell area</span>
+
+irradiance = float(input("Irradiance during sweep (W/m²): "))
+temp_c = float(input("Back-of-module temperature (°C): "))
+
+with serial.Serial(PORT, 115200, timeout=5) as s:
+    while b"Ready" not in s.readline():   <span class="c"># Arduino resets when the port opens</span>
+        pass
+    s.write(b"s")
+    rows = []
+    for raw in iter(s.readline, b""):
+        line = raw.decode(errors="ignore").strip()
+        if line == "done":
+            break
+        if line[:1].isdigit():
+            rows.append([float(x) for x in line.split(",")])
+
+v, i = np.array(rows).T
+i = np.clip(i, 0, None)
+p = v * i
+k = p.argmax()
+voc, isc = v.max(), i.max()
+ff = p[k] / (voc * isc)
+
+print(f"Voc {voc:.2f} V   Isc {isc:.2f} A   Vmp {v[k]:.2f} V   Imp {i[k]:.2f} A")
+print(f"Pmax {p[k]:.1f} W   Fill factor {ff:.3f}")
+print(f"Efficiency: {p[k] / (irradiance * MODULE_AREA):.1%} module, "
+      f"{p[k] / (irradiance * CELL_AREA):.1%} cell area")
+
+<span class="c"># Correct to STC (1000 W/m², 25 °C cell). Cell runs ~3 °C above the back sheet.</span>
+gamma = -0.0037
+p_stc = p[k] * (1000 / irradiance) / (1 + gamma * (temp_c + 3 - 25))
+print(f"Pmax corrected to STC: {p_stc:.1f} W")
+
+stamp = time.strftime("%Y%m%d-%H%M%S")
+np.savetxt(f"iv_{stamp}.csv", np.c_[v, i], delimiter=",", header="volts,amps", comments="")
+
+fig, ax = plt.subplots(figsize=(7, 4.2))
+ax.plot(v, i, label="Current")
+ax.set_xlabel("Voltage (V)"); ax.set_ylabel("Current (A)")
+ax2 = ax.twinx()
+ax2.plot(v, p, color="tab:orange", label="Power")
+ax2.plot(v[k], p[k], "o", color="tab:orange")
+ax2.set_ylabel("Power (W)")
+ax.set_title(f"{irradiance:.0f} W/m², {temp_c:.0f} °C back sheet: Pmax {p[k]:.1f} W, FF {ff:.2f}")
+fig.tight_layout()
+fig.savefig(f"iv_{stamp}.png", dpi=200)
+plt.show()</pre></div>
+    <div class="callout"><p><strong>Keep the MOSFET alive.</strong> It dissipates up to ≈ 90 W while passing through the max-power region. Mount it on a real heatsink with thermal paste, keep sweeps short (the sketch takes about 1 s), and wait 30 s between sweeps.</p></div>
+
+    <h3>Measuring irradiance on a budget</h3>
+    <p>You need to know how much sunlight hit the panel, or efficiency means nothing. A pyranometer is expensive. Instead, <strong>use a spare cell as a reference sensor.</strong> Put a 0.05 Ω, 5 W resistor across its contacts, mount it in the same plane as the panel, and measure the millivolts across the resistor:</p>
+    <div class="formula">I_sc,ref = V_resistor / 0.05 Ω
+G  ≈  1000 W/m² × I_sc,ref / I_sc,ref(STC)</div>
+    <p>I<sub>sc</sub> is almost exactly proportional to irradiance, so this works well. Calibrate it once on a clear day against a nearby weather station's published solar radiation data, and say so in your methods.</p>
+
+    <h3>Measurement protocol</h3>
+    <ol>
+      <li>Clear sky, within about 1.5 h of solar noon, panel tilted to face the sun squarely (its shadow is smallest).</li>
+      <li>Let the panel stabilize for 10 minutes. Tape a thermometer probe (a DS18B20 works) to the back, behind a centre cell.</li>
+      <li>Read irradiance, run the sweep, read irradiance again. If the two readings differ by more than 2%, a cloud passed. Discard the sweep.</li>
+      <li>Take three sweeps per session and report the mean and spread. Repeat on at least three different days.</li>
+      <li>Also sweep: one row shaded (shows the bypass diodes), and early morning versus noon (shows irradiance and temperature effects). These make excellent report figures.</li>
+    </ol>
+
+    <h3>What to calculate</h3>
+    <div class="formula">Fill factor         FF   = P_max / (V_oc × I_sc)          good hand-built: 0.72–0.78
+Efficiency          η    = P_max / (G × A)                 report both module and cell area
+STC power           P_stc = P_max × (1000/G) / (1 + γ(T_cell − 25)),   γ ≈ −0.0037 /°C
+Cell-to-module      CTM  = P_module / Σ P_cells             factory ≈ 97–100%, DIY ≈ 85–93%
+Cost per watt       $/W  = total cost / P_stc               compare with a commercial panel</div>
+    <p><strong>The CTM ratio is your best analysis tool.</strong> Break the loss into its causes: front-sheet reflection (measure one cell's I<sub>sc</sub> with and without the front sheet over it), resistive loss (lower fill factor than a single cell), and mismatch (the spread of your binned cells). Explaining where the missing watts went is what makes this an engineering report.</p>
+
+    <h3>Stretch goal: electroluminescence imaging</h3>
+    <p>Forward-bias the panel in a dark room with a bench supply at about I<sub>sc</sub>, and it glows faintly in near-infrared. Photograph it with a camera whose IR-cut filter has been removed (cheap webcams are easy to modify) using a long exposure. Cracks and dead areas show as dark lines. Factories use exactly this for quality control. Before-and-after-sealing EL images make a striking poster panel.</p>
+  </section>
+
+  <!-- ================= TROUBLESHOOT ================= -->
+  <section id="troubleshoot">
+    <span class="eyebrow">Diagnosis</span>
+    <h2>Troubleshooting</h2>
+    <div class="tablewrap"><table class="data">
+      <thead><tr><th>Symptom</th><th>Likely cause</th><th>Fix</th></tr></thead>
+      <tbody>
+        <tr><td>V<sub>oc</sub> low by ≈ 0.6 V or a multiple of it</td><td>A cell shorted by a stray ribbon, or soldered in reversed</td><td>Measure each row's V<sub>oc</sub>, then each cell's across its ribbons</td></tr>
+        <tr><td>Zero output</td><td>Open joint or broken ribbon</td><td>Cover the panel, then check continuity row by row</td></tr>
+        <tr><td>Current well below one cell's I<sub>sc</sub></td><td>A cracked or weak cell limiting the string, or shading</td><td>IR thermometer under short circuit. The weak cell runs hot.</td></tr>
+        <tr><td>Fill factor below 0.65</td><td>Series resistance: cold joints, thin wiring, bad MC4 crimp</td><td>Reflow dull or grey joints. Use 4 mm² cable. Re-crimp connectors.</td></tr>
+        <tr><td>Rounded “knee” with steps in the curve</td><td>Mismatched cells, or partial shade triggering a bypass diode</td><td>Re-sweep in full sun. Check your cell bins.</td></tr>
+        <tr><td>Output halves with no shading</td><td>A bypass diode shorted or fitted backwards</td><td>Test the diodes in diode mode. Check each cathode faces the + end.</td></tr>
+        <tr><td>Fog or droplets inside</td><td>A seal leak, or no desiccant</td><td>Dry it in the sun on its side, re-seal the seams, add desiccant</td></tr>
+        <tr><td>Brown or green spots on the busbars</td><td>Acetoxy silicone, or leftover flux corroding</td><td>Only neutral-cure silicone. Wipe flux residue with isopropyl alcohol.</td></tr>
+        <tr><td>Ribbon lifts off the busbar</td><td>Too little flux or heat, or dirty busbars</td><td>Re-flux, let the iron recover, one slow steady stroke</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <!-- ================= DSSC ================= -->
+  <section id="dssc">
+    <span class="eyebrow">Optional side track</span>
+    <h2>Make a photovoltaic cell yourself</h2>
+    <p>The dye-sensitized solar cell (Grätzel cell) is the one PV device you can make from raw materials in a teaching lab. Expect about 0.4–0.5 V and a few milliamps in sunlight. Its value is the contrast: it lets you compare a device you synthesized with industrial silicon in your report.</p>
+    <ol>
+      <li><strong>Materials:</strong> 2 FTO-coated conductive glass slides, TiO₂ nanopowder (P25), dilute acetic acid, blackberries or raspberries, potassium iodide and iodine in ethylene glycol (iodide electrolyte), a graphite pencil or candle, binder clips. Educational DSSC kits bundle all of this.</li>
+      <li><strong>Photoanode:</strong> make a paste of TiO₂ and dilute acetic acid. Mask the edges of one slide's conductive side with tape and spread a thin, even layer with a glass rod (“doctor blading”).</li>
+      <li><strong>Sinter</strong> at about 450 °C for 30 minutes on a hot plate or in a lab furnace, then let it cool slowly.</li>
+      <li><strong>Dye:</strong> soak the TiO₂ film in crushed berry juice for 10 minutes. The anthocyanins bind to the TiO₂ and turn it deep purple. Rinse with water, then ethanol, and dry.</li>
+      <li><strong>Counter-electrode:</strong> coat the second slide's conductive side with graphite (pencil) or candle soot.</li>
+      <li><strong>Assemble:</strong> offset the slides face-to-face, clip them together, and let a drop of electrolyte wick between them. Measure V<sub>oc</sub> and I<sub>sc</sub> in sunlight with the multimeter. The INA226 tracer's resolution is too coarse at milliamp currents, so do the I–V curve with a potentiometer and two meters.</li>
+    </ol>
+    <div class="callout danger"><p><strong>Lab only, with supervision.</strong> Iodine stains and irritates skin. Ethylene glycol is toxic. The 450 °C sintering step is a burn hazard. Use gloves, goggles and a fume hood as your lab's rules require.</p></div>
+  </section>
+
+  <!-- ================= PLAN ================= -->
+  <section id="plan">
+    <span class="eyebrow">Schedule</span>
+    <h2>Eight-week plan</h2>
+    <p>The schedule is built around the one thing you can't speed up: shipping the cells. Order them on day one, then build the test rig while you wait.</p>
+    <div class="weeks">
+      <div class="week"><span class="when">Week 1</span><b>Design and order.</b> Finalize the cell choice and layout, and write a one-page design brief with targets. Order cells, ribbon and flux first, then everything else. Start the lab notebook.</div>
+      <div class="week"><span class="when">Week 2</span><b>Build the tracer.</b> Assemble the Arduino rig and verify it on a known load: a power resistor, or a commercial panel borrowed from the lab. Buy the frame and front sheet. <em>Optional: make the DSSC.</em></div>
+      <div class="week"><span class="when">Week 3</span><b>Cells arrive.</b> Inspect, measure and bin all cells. Build the reference irradiance cell. Practise soldering on broken cells.</div>
+      <div class="week"><span class="when">Week 4</span><b>Tab and string.</b> Tab all 36 cells and build the four rows. Row-level pass checks.</div>
+      <div class="week"><span class="when">Week 5</span><b>Bus, diodes, baseline.</b> Mount on the backing, bus the rows, fit the junction box. Full pre-seal I–V sweep and hot-spot scan.</div>
+      <div class="week"><span class="when">Week 6</span><b>Seal and frame.</b> Encapsulate, frame, cure. Water test. Post-seal I–V sweep (the difference from week 5 is your encapsulation loss).</div>
+      <div class="week"><span class="when">Week 7</span><b>Characterize.</b> Three or more measurement days: STC-corrected power, shading test, temperature behaviour. Optional EL imaging.</div>
+      <div class="week"><span class="when">Week 8</span><b>Analyze and present.</b> CTM loss breakdown, cost per watt, report, poster, GitHub repository, demo video.</div>
+    </div>
+  </section>
+
+  <!-- ================= RESUME ================= -->
+  <section id="resume">
+    <span class="eyebrow">Deliverables</span>
+    <h2>Report, portfolio and résumé</h2>
+    <h3>Document as you go</h3>
+    <ul>
+      <li><strong>Lab notebook</strong> with dates, every measurement, and every mistake and what you changed.</li>
+      <li><strong>Photos of every stage</strong> on a plain background with a ruler in frame. Take a close-up of a good solder joint and a bad one.</li>
+      <li><strong>Raw data</strong>: the cell-sorting spreadsheet and every I–V CSV, named by date and condition.</li>
+      <li><strong>A GitHub repository</strong> with the tracer firmware, analysis script, BOM, wiring diagram and a README that summarizes your results.</li>
+    </ul>
+
+    <h3>Report structure</h3>
+    <ol>
+      <li>Abstract: what you built and your headline numbers</li>
+      <li>Background: PV physics, module construction, why 36 cells</li>
+      <li>Design: specification, layout, encapsulation trade-off, bypass protection</li>
+      <li>Build method, with photos</li>
+      <li>Instrumentation: tracer design, calibration, irradiance method, uncertainty</li>
+      <li>Results: I–V curves, STC power, efficiency, fill factor, shading and temperature tests</li>
+      <li>Loss analysis: the CTM breakdown, and a comparison with a commercial panel on performance and $/W</li>
+      <li>Conclusions and what you'd change: e.g. EVA lamination, better cell matching</li>
+    </ol>
+
+    <h3>Résumé bullets (replace the brackets with your measured numbers)</h3>
+    <div class="resume">
+      <ul>
+        <li>Designed and hand-assembled a 36-cell, <span class="ph">[80]</span> W monocrystalline PV module on a <span class="ph">[$150]</span> budget, including series string layout, bypass-diode protection and weatherproof encapsulation.</li>
+        <li>Built an Arduino-based I–V curve tracer (MOSFET electronic load, INA226 sensing, Python analysis) and characterized the module outdoors: <span class="ph">[78]</span> W STC-corrected, fill factor <span class="ph">[0.75]</span>, <span class="ph">[17.8]</span>% cell-area efficiency.</li>
+        <li>Quantified a <span class="ph">[91]</span>% cell-to-module ratio and attributed the losses to front-sheet reflection, solder-joint resistance and cell mismatch. Published the firmware, data and build documentation on GitHub.</li>
+      </ul>
+    </div>
+    <p class="muted" style="font-size:.9rem">Interview tip: be ready to explain why you chose 36 cells, what the bypass diodes do, and which single change would recover the most lost power. Those three answers show you understood the design rather than just following a guide.</p>
+  </section>
+
+  <!-- ================= SOURCES ================= -->
+  <section id="sources">
+    <span class="eyebrow">Further reading</span>
+    <h2>Sources</h2>
+    <ul>
+      <li><a href="https://www.pveducation.org/" target="_blank" rel="noopener">PVEducation.org</a>, by C. Honsberg and S. Bowden: free, rigorous textbook on cell physics, I–V curves, modules and losses. Cite it in your background section.</li>
+      <li><a href="https://www.nrel.gov/pv/cell-efficiency.html" target="_blank" rel="noopener">NREL Best Research-Cell Efficiency Chart</a>: puts your cells and your DSSC in context.</li>
+      <li>IEC 61215 and IEC 61730: the qualification and safety standards commercial modules pass. Mention which of their tests (damp heat, thermal cycling, hot spot) your build would fail, and why.</li>
+      <li>B. O'Regan and M. Grätzel, “A low-cost, high-efficiency solar cell based on dye-sensitized colloidal TiO₂ films”, <em>Nature</em> 353, 737–740 (1991): the original DSSC paper.</li>
+      <li><a href="https://github.com/RobTillaart/INA226" target="_blank" rel="noopener">INA226 Arduino library</a> and <a href="https://github.com/adafruit/Adafruit_MCP4725" target="_blank" rel="noopener">MCP4725 library</a>, used by the tracer.</li>
+    </ul>
+    <footer>Figures are typical values for mono PERC cells and 2026 US prices. Always design from your own cells' datasheet and your own measurements, and follow your university lab's safety rules.</footer>
+  </section>
+</main>
+</div>
+
+<script>
+(function(){
+  const $ = (s, r=document) => r.querySelector(s);
+  const NS = "http://www.w3.org/2000/svg";
+  const el = (tag, attrs={}, text) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (text != null) e.textContent = text; return e; };
+
+  /* ---------------- I–V explorer ---------------- */
+  const CELLS = {
+    "156": {isc:4.75, voc:0.675, w:156.75, l:78.4, area:0.01229},
+    "166": {isc:5.45, voc:0.680, w:166,    l:83,   area:0.01378},
+    "182": {isc:6.95, voc:0.685, w:182,    l:91,   area:0.01656}
+  };
+  const q = 1.602e-19, kB = 1.381e-23, nId = 1.2;
+
+  function model(cell, Ns, G, T){
+    const Vt = kB * (T + 273.15) / q;
+    const alpha = 0.0005, beta = -0.0029;
+    const iscStcT = cell.isc * (1 + alpha * (T - 25));
+    const vocStcT = cell.voc * (1 + beta * (T - 25));
+    const I0 = iscStcT / (Math.exp(vocStcT / (nId * Vt)) - 1);
+    const Isc = iscStcT * G / 1000;
+    const Rs = 0.006 * 4.75 / cell.isc;
+    const pts = [];
+    const N = 240;
+    for (let j = 0; j <= N; j++){
+      const I = Isc * j / N;
+      const vc = nId * Vt * Math.log((Isc - I) / I0 + 1) - I * Rs;
+      const V = Math.max(0, Ns * vc);
+      pts.push({V, I, P: V * I});
+    }
+    let mpp = pts[0];
+    for (const p of pts) if (p.P > mpp.P) mpp = p;
+    return {pts, mpp, Voc: pts[0].V, Isc};
+  }
+
+  function niceCeil(x){
+    const steps = [1, 1.2, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10];
+    const m = Math.pow(10, Math.floor(Math.log10(x)));
+    for (const s of steps) if (s * m >= x) return s * m;
+    return 10 * m;
+  }
+
+  const ns = $("#ns"), irr = $("#irr"), temp = $("#temp"), ctype = $("#cellType"), svg = $("#ivchart");
+
+  function drawIV(){
+    const cell = CELLS[ctype.value];
+    const Ns = +ns.value, G = +irr.value, T = +temp.value;
+    $("#nsOut").textContent = Ns;
+    $("#irrOut").textContent = G + " W/m²";
+    $("#tempOut").textContent = T + " °C";
+
+    const m = model(cell, Ns, G, T);
+    const ref = model(cell, Ns, 1000, 0);
+    const xMax = niceCeil(ref.Voc * 1.02);
+    const yMax = niceCeil(cell.isc * 1.12 * 1.1);
+    const pMax = niceCeil(model(cell, Ns, 1100, 0).mpp.P * 1.05);
+
+    const L = 56, R = 584, Tp = 20, B = 280;
+    const sx = v => L + (v / xMax) * (R - L);
+    const sy = i => B - (i / yMax) * (B - Tp);
+    const sp = p => B - (p / pMax) * (B - Tp);
+
+    svg.replaceChildren();
+    const grid = el("g", {stroke: "var(--line)", "stroke-width": 1});
+    const labels = el("g", {"font-size": 11, fill: "var(--muted)"});
+    const xStep = xMax / 5, yStep = yMax / 5, pStep = pMax / 5;
+    for (let k = 0; k <= 5; k++){
+      const x = sx(k * xStep), y = sy(k * yStep);
+      grid.append(el("line", {x1: x, x2: x, y1: Tp, y2: B}));
+      grid.append(el("line", {x1: L, x2: R, y1: y, y2: y}));
+      labels.append(el("text", {x, y: B + 16, "text-anchor": "middle"}, +(k * xStep).toFixed(1)));
+      labels.append(el("text", {x: L - 8, y: y + 4, "text-anchor": "end"}, +(k * yStep).toFixed(1)));
+      labels.append(el("text", {x: R + 8, y: sp(k * pStep) + 4, "text-anchor": "start", fill: "var(--accent)"}, Math.round(k * pStep)));
+    }
+    labels.append(el("text", {x: (L + R) / 2, y: B + 38, "text-anchor": "middle", fill: "var(--ink)"}, "Voltage (V)"));
+    labels.append(el("text", {x: 14, y: (Tp + B) / 2, "text-anchor": "middle", fill: "var(--ink)", transform: `rotate(-90 14 ${(Tp + B) / 2})`}, "Current (A)"));
+    labels.append(el("text", {x: 630, y: (Tp + B) / 2, "text-anchor": "middle", fill: "var(--accent)", transform: `rotate(90 630 ${(Tp + B) / 2})`}, "Power (W)"));
+    svg.append(grid, labels);
+
+    // 12 V battery charging threshold
+    if (15 < xMax){
+      const bx = sx(15);
+      svg.append(el("line", {x1: bx, x2: bx, y1: Tp, y2: B, stroke: "var(--good)", "stroke-width": 1.5, "stroke-dasharray": "5 4"}));
+      svg.append(el("text", {x: bx - 6, y: Tp + 12, "text-anchor": "end", "font-size": 11, fill: "var(--good)"}, "15 V: 12 V battery charging"));
+    }
+
+    const ivPath = m.pts.map((p, j) => (j ? "L" : "M") + sx(p.V).toFixed(1) + " " + sy(p.I).toFixed(1)).join(" ");
+    const pvPath = m.pts.map((p, j) => (j ? "L" : "M") + sx(p.V).toFixed(1) + " " + sp(p.P).toFixed(1)).join(" ");
+    svg.append(el("path", {d: pvPath, fill: "none", stroke: "var(--accent)", "stroke-width": 2.4}));
+    svg.append(el("path", {d: ivPath, fill: "none", stroke: "var(--ink)", "stroke-width": 2.4}));
+    const mx = sx(m.mpp.V), my = sp(m.mpp.P);
+    svg.append(el("line", {x1: mx, x2: mx, y1: my, y2: B, stroke: "var(--accent)", "stroke-width": 1, "stroke-dasharray": "2 3"}));
+    svg.append(el("circle", {cx: mx, cy: my, r: 5, fill: "var(--accent)", stroke: "var(--surface)", "stroke-width": 2}));
+    svg.append(el("text", {x: mx + (mx > 420 ? -10 : 10), y: my - 10, "text-anchor": mx > 420 ? "end" : "start", "font-size": 12, fill: "var(--accent)", "font-weight": 600}, "MPP " + m.mpp.P.toFixed(1) + " W"));
+
+    // readout
+    const ff = m.mpp.P / (m.Voc * m.Isc);
+    const eff = m.mpp.P / (G * Ns * cell.area);
+    const rows = Ns <= 24 ? 2 : Ns <= 48 ? 4 : 6;
+    const perRow = Math.ceil(Ns / rows);
+    const wid = Math.round(perRow * cell.l + (perRow - 1) * 2 + 60);
+    const hei = Math.round(rows * cell.w + (rows - 1) * 8 + 60);
+    const charges = m.mpp.V >= 15;
+    const items = [
+      ["Pmax", m.mpp.P.toFixed(1) + " W"],
+      ["Vmp", m.mpp.V.toFixed(1) + " V", charges ? "ok" : "bad"],
+      ["Imp", m.mpp.I.toFixed(2) + " A"],
+      ["Voc", m.Voc.toFixed(1) + " V"],
+      ["Isc", m.Isc.toFixed(2) + " A"],
+      ["Fill factor", ff.toFixed(3)],
+      ["Cell-area eff.", (eff * 100).toFixed(1) + " %"],
+      ["Size (approx)", wid + " × " + hei + " mm"],
+      ["12 V charging", charges ? "Yes" : "Too low", charges ? "ok" : "bad"]
+    ];
+    $("#ivReadout").replaceChildren(...items.map(([k, v, c]) => {
+      const d = document.createElement("div");
+      const s = document.createElement("small"); s.textContent = k;
+      const b = document.createElement("b"); b.textContent = v; if (c) b.className = c;
+      d.append(s, b); return d;
+    }));
+  }
+  [ns, irr, temp, ctype].forEach(x => x.addEventListener("input", drawIV));
+  drawIV();
+
+  /* ---------------- Layout diagram ---------------- */
+  (function drawLayout(){
+    const s = $("#layout");
+    const cw = 52, ch = 78, gx = 4, gy = 14, ox = 120, oy = 40;
+    const g = el("g");
+    s.append(el("rect", {x: ox - 22, y: oy - 22, width: 9 * cw + 8 * gx + 44, height: 4 * ch + 3 * gy + 44, rx: 4, fill: "var(--sunken)", stroke: "var(--muted)", "stroke-width": 1.5}));
+    const centers = [];
+    for (let r = 0; r < 4; r++){
+      const row = [];
+      for (let c = 0; c < 9; c++){
+        const x = ox + c * (cw + gx), y = oy + r * (ch + gy);
+        g.append(el("rect", {x, y, width: cw, height: ch, rx: 2, fill: "var(--cell)"}));
+        for (let b = 1; b <= 5; b++) g.append(el("line", {x1: x + 2, x2: x + cw - 2, y1: y + b * ch / 6, y2: y + b * ch / 6, stroke: "var(--cell-line)", "stroke-width": 1}));
+        row.push({x: x + cw / 2, y: y + ch / 2});
+      }
+      centers.push(r % 2 ? row.reverse() : row);
+    }
+    s.append(g);
+    // current path
+    let d = "";
+    centers.forEach((row, r) => row.forEach((p, c) => { d += (r === 0 && c === 0 ? "M" : "L") + p.x + " " + p.y + " "; }));
+    const startX = ox - 60, A = centers[0][0], Bp = centers[1][8], C = centers[3][8];
+    s.append(el("path", {d: `M${startX} ${A.y} L${A.x} ${A.y} ` + d.replace(/^M[^L]+/, "") + ` L${startX} ${C.y}`, fill: "none", stroke: "var(--accent)", "stroke-width": 2.4, "stroke-linejoin": "round", opacity: .95}));
+    s.append(el("path", {d: `M${Bp.x} ${Bp.y} L${Bp.x} ${Bp.y + (ch + gy) / 2} L${startX} ${Bp.y + (ch + gy) / 2}`, fill: "none", stroke: "var(--accent)", "stroke-width": 2, "stroke-dasharray": "5 4"}));
+    const midY = Bp.y + (ch + gy) / 2;
+    // junction box
+    const jx = 18, jw = 60;
+    s.append(el("rect", {x: jx - 6, y: A.y - 20, width: jw, height: C.y - A.y + 40, rx: 4, fill: "var(--surface)", stroke: "var(--ink)", "stroke-width": 1.5}));
+    const txt = el("g", {"font-size": 12, fill: "var(--ink)"});
+    [[A.y, "A  −"], [midY, "B"], [C.y, "C  +"]].forEach(([y, t]) => {
+      s.append(el("circle", {cx: startX, cy: y, r: 4, fill: "var(--ink)"}));
+      txt.append(el("text", {x: startX + 8, y: y - 6}, t));
+    });
+    // diodes (cathode toward + : C is +, so D1 cathode at B, D2 cathode at C)
+    function diode(y1, y2, label){
+      const x = jx + 18, ym = (y1 + y2) / 2;
+      s.append(el("line", {x1: x, x2: x, y1, y2, stroke: "var(--ink)", "stroke-width": 1.5}));
+      s.append(el("line", {x1: x, x2: startX, y1, y2: y1, stroke: "var(--ink)", "stroke-width": 1.5}));
+      s.append(el("line", {x1: x, x2: startX, y1: y2, y2: y2, stroke: "var(--ink)", "stroke-width": 1.5}));
+      s.append(el("path", {d: `M${x - 8} ${ym - 7} L${x + 8} ${ym - 7} L${x} ${ym + 6} Z`, fill: "var(--ink)"}));
+      s.append(el("line", {x1: x - 9, x2: x + 9, y1: ym + 7, y2: ym + 7, stroke: "var(--ink)", "stroke-width": 2.4}));
+      txt.append(el("text", {x: x - 14, y: ym + 4, "text-anchor": "end"}, label));
+    }
+    diode(A.y, midY, "D1");
+    diode(midY, C.y, "D2");
+    ["Row 1 →", "← Row 2", "Row 3 →", "← Row 4"].forEach((t, r) => txt.append(el("text", {x: ox + 9 * (cw + gx) + 14, y: oy + r * (ch + gy) + ch / 2 + 4, fill: "var(--muted)"}, t)));
+    txt.append(el("text", {x: jx + 24, y: C.y + 38, "text-anchor": "middle", fill: "var(--muted)", "font-size": 11}, "J-box"));
+    s.append(txt);
+  })();
+
+  /* ---------------- BOM ---------------- */
+  const BOM = [
+    ["Module", "cells", "Solar cells ×42", "Mono PERC half-cut, 3–5 busbars, B-grade OK. 36 + 6 spares.", 35, 60],
+    ["Module", "ribbon", "Tabbing ribbon, 30 m", "≈ 2 × 0.15 mm tinned copper. Often bundled with cells.", 8, 12],
+    ["Module", "bus", "Bus ribbon, 5 m", "≈ 5 × 0.25 mm, for row ends and output leads", 5, 8],
+    ["Module", "flux", "No-clean flux pen ×2", "Rosin, no-clean. You'll use more than you expect.", 8, 12],
+    ["Module", "front", "Front sheet ≈ 800 × 720 mm", "3 mm UV-stabilized polycarbonate or tempered glass. Salvaged glass is free.", 25, 50],
+    ["Module", "back", "Backing board", "3 mm aluminium composite panel. Lean: sealed and painted 6 mm plywood.", 10, 25],
+    ["Module", "frame", "Aluminium angle 25 × 25 mm, 3 m", "Plus pop rivets and corner brackets", 15, 25],
+    ["Module", "silicone", "Neutral-cure silicone ×2", "Must say neutral cure. No vinegar smell.", 10, 16],
+    ["Module", "butyl", "Butyl sealant tape", "Perimeter spacer and moisture barrier", 6, 10],
+    ["Module", "jbox", "Junction box + MC4 leads", "IP65 box with 2 × 15 A Schottky diodes (15SQ045), 4 mm² cable", 8, 15],
+    ["Module", "desiccant", "Desiccant sachets", "Silica gel, tucked in the border", 3, 5],
+    ["Test rig", "arduino", "Arduino Nano or Uno (clone)", "Any 5 V board with I²C", 5, 12],
+    ["Test rig", "ina", "INA226 module + 0.01 Ω shunt", "Replace the stock R100 shunt, or buy an R010 version", 4, 8],
+    ["Test rig", "dac", "MCP4725 12-bit DAC", "I²C, drives the MOSFET gate", 3, 6],
+    ["Test rig", "fet", "IRLZ44N + heatsink + resistors", "Logic-level MOSFET, 100 Ω and 100 kΩ, thermal paste", 5, 9],
+    ["Test rig", "safety", "7.5 A fuse, switch, MC4 pair", "Inline blade-fuse holder", 6, 10],
+    ["Test rig", "ref", "Reference-cell shunt + DS18B20", "0.05 Ω 5 W resistor and a waterproof temperature probe", 4, 7],
+    ["Tools", "iron", "Temperature-controlled soldering station", "Borrow from the lab if possible", 0, 35],
+    ["Tools", "meter", "Multimeter with 10 A range", "Borrow if possible", 0, 25],
+    ["Tools", "irtherm", "IR thermometer", "Hot-spot checks and temperature correction", 0, 18]
+  ];
+  const DEFAULT_OFF = new Set(["iron", "meter", "irtherm"]);
+  const KEY = "solar-bom-v1";
+  let state = {};
+  try { state = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch (e) { state = {}; }
+  const isOn = id => (id in state) ? state[id] : !DEFAULT_OFF.has(id);
+
+  const tbody = $("#bomTable tbody");
+  let lastCat = "";
+  BOM.forEach(([cat, id, name, spec, lo, hi]) => {
+    if (cat !== lastCat){
+      const tr = document.createElement("tr"); tr.className = "bom-cat";
+      const td = document.createElement("td"); td.colSpan = 5; td.textContent = cat === "Tools" ? "Tools (unticked = borrowing)" : cat;
+      tr.append(td); tbody.append(tr); lastCat = cat;
+    }
+    const tr = document.createElement("tr"); tr.dataset.id = id;
+    tr.innerHTML = `<td><input type="checkbox" id="bom-${id}" aria-label="Buy ${name}"></td><td><label for="bom-${id}" class="nm">${name}</label></td><td class="muted">${spec}</td><td class="r">$${lo}</td><td class="r">$${hi}</td>`;
+    const cb = tr.querySelector("input");
+    cb.checked = isOn(id);
+    tr.classList.toggle("off", !cb.checked);
+    cb.addEventListener("change", () => {
+      state[id] = cb.checked;
+      tr.classList.toggle("off", !cb.checked);
+      try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
+      totals();
+    });
+    tbody.append(tr);
+  });
+  function totals(){
+    const sum = {};
+    let lo = 0, hi = 0;
+    BOM.forEach(([cat, id, , , l, h]) => {
+      if (!isOn(id)) return;
+      sum[cat] = sum[cat] || [0, 0]; sum[cat][0] += l; sum[cat][1] += h; lo += l; hi += h;
+    });
+    const parts = Object.entries(sum).map(([c, [l, h]]) => `<span class="muted">${c}: <span class="num">$${l}–${h}</span></span>`).join("");
+    $("#bomTotal").innerHTML = `<span>Your total</span><b>$${lo} – $${hi}</b>${parts}`;
+  }
+  totals();
+
+  /* ---------------- Copy buttons ---------------- */
+  document.querySelectorAll("[data-copy]").forEach(btn => btn.addEventListener("click", () => {
+    const pre = document.getElementById(btn.dataset.copy);
+    const done = () => { btn.textContent = "Copied"; setTimeout(() => btn.textContent = "Copy", 1600); };
+    navigator.clipboard.writeText(pre.innerText).then(done).catch(() => {
+      const r = document.createRange(); r.selectNodeContents(pre);
+      const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r);
+      btn.textContent = "Press Ctrl+C";
+    });
+  }));
+
+  /* ---------------- TOC highlight ---------------- */
+  const links = [...document.querySelectorAll(".toc a")];
+  const sections = links.map(a => document.querySelector(a.getAttribute("href")));
+  function onScroll(){
+    let cur = sections[0];
+    for (const s of sections) if (s.getBoundingClientRect().top < 140) cur = s;
+    links.forEach(a => a.classList.toggle("active", a.getAttribute("href") === "#" + cur.id));
+  }
+  addEventListener("scroll", onScroll, {passive: true});
+  onScroll();
+})();
+</script>
+
+</body>
+</html>
+
