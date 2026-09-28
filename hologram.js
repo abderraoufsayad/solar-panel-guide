@@ -22,7 +22,7 @@ import { LineMaterial } from "three/addons/lines/LineMaterial.js";
 const K = ["ex", "cells", "rib", "flow", "jb", "front", "fv", "fin", "sun", "power"];
 const STAGES = [
   { t: "Exploded view", d: "Every layer of the 80 W module, pulled apart: front sheet, 36 silicon cells, backing panel, junction box and frame.",
-    s: [1, 1, 1, 0, 1, 1, 1, 0, 0, 0], cam: [0.75, 1.02, 19.5], dur: 7.5 },
+    s: [1, 1, 1, 0, 1, 1, 1, 0, 0, 0], cam: [0.75, 1.02, 21.5], dur: 7.5 },
   { t: "Sort the cells", d: "Each cell is measured and binned within ±3% current. In a series string, the weakest cell sets the pace for all 36.",
     s: [1, 1, 0, 0, 0, 0, 0, 0, 0, 0], cam: [0.25, 0.72, 14], dur: 7, enter: { cells: 0 } },
   { t: "Tab the busbars", d: "180 tinned-copper ribbons are soldered along the front busbars in single, steady strokes at about 340 °C.",
@@ -71,6 +71,11 @@ const CSS = `
 .holo .holo-label.flip{padding:3px 20px 3px 8px;background:linear-gradient(270deg,transparent,rgba(2,11,18,.55) 18px)}
 .holo .holo-label.flip::before{left:auto;right:0}
 .holo .holo-label.flip::after{left:auto;right:-3px}
+.holo .holo-leaders{position:absolute;inset:0;width:100%;height:100%;z-index:3;pointer-events:none;overflow:visible}
+.holo .holo-leaders path{fill:none;stroke:var(--h-cyan);stroke-width:1;opacity:0;transition:opacity .5s;filter:drop-shadow(0 0 3px rgba(70,232,255,.8))}
+.holo .holo-leaders circle{fill:var(--h-bg);stroke:var(--h-cyan);stroke-width:1.5;opacity:0;transition:opacity .5s;filter:drop-shadow(0 0 4px rgba(70,232,255,.9))}
+.holo .holo-label.call{padding:6px 11px;border:1px solid rgba(70,232,255,.5);border-radius:2px;background:rgba(2,16,26,.78);box-shadow:0 0 14px -4px rgba(70,232,255,.45)}
+.holo .holo-label.call::before,.holo .holo-label.call::after{display:none}
 .holo .holo-label.amber{color:var(--h-amber);text-shadow:0 0 6px rgba(255,179,92,.75)}
 .holo .holo-label::before{content:"";position:absolute;left:0;top:50%;width:14px;height:1px;background:currentColor;box-shadow:0 0 6px currentColor}
 .holo .holo-label::after{content:"";position:absolute;left:-3px;top:calc(50% - 3px);width:6px;height:6px;border-radius:50%;background:currentColor;box-shadow:0 0 10px currentColor}
@@ -126,6 +131,7 @@ export function mountHologram(root, { mode = "embed", stage: startStage = 0 } = 
       <div class="holo-hud tl">DIY-36M-HC<br><span class="dim">Build sequence // 36-cell module</span></div>
       <div class="holo-hud tr" data-meta></div>
       <div class="holo-power" data-power>Output · hand-built target<b data-watts>0.0 W</b><span data-vi>0.0 V · 0.00 A</span></div>
+      <svg class="holo-leaders" data-leaders aria-hidden="true"></svg>
       <div data-labels></div>
       <div class="holo-caption" aria-live="polite"><div class="inner"><span class="n" data-n></span><strong class="holo-title" data-title></strong><p data-text></p></div></div>
       <div class="holo-fallback" data-fallback hidden></div>
@@ -199,7 +205,7 @@ export function mountHologram(root, { mode = "embed", stage: startStage = 0 } = 
   renderer.setPixelRatio(PR());
   renderer.setClearColor(0x020b12, 1);
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 0.9;
+  renderer.toneMappingExposure = 0.72;
 
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(34, 1, 0.1, 200);
@@ -217,7 +223,7 @@ export function mountHologram(root, { mode = "embed", stage: startStage = 0 } = 
 
   const composer = new EffectComposer(renderer);
   composer.addPass(new RenderPass(scene, camera));
-  const bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), 0.75, 0.45, 0.3);
+  const bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), 0.55, 0.4, 0.38);
   composer.addPass(bloom);
   const lens = new ShaderPass({
     uniforms: { tDiffuse: { value: null }, uTime: { value: 0 }, uAmt: { value: 0.012 } },
@@ -263,7 +269,7 @@ export function mountHologram(root, { mode = "embed", stage: startStage = 0 } = 
       float band = pow(max(0.0, 1.0 - abs(fract(vW.z * 0.11 + vW.y * 0.22 - uTime * 0.16) - 0.5) * 2.0), 20.0);
       float m = uUseMap > 0.5 ? texture2D(uMap, vUv).r : 0.0;
       float a = (uBase + fres * uRim + m * 0.42 + band * 0.18 + uPulse * 0.35) * scan * uOpacity * uFlick;
-      vec3 col = uColor * (0.42 + fres * 0.8 + m * 0.95 + band * 0.7) * (1.0 + uPulse * 1.8);
+      vec3 col = uColor * (0.34 + fres * 0.65 + m * 0.7 + band * 0.55) * (1.0 + uPulse * 1.8);
       col = mix(col, vec3(1.0, 0.7, 0.32) * (1.0 + m * 2.2), uGlow * 0.65);
       gl_FragColor = vec4(col, clamp(a, 0.0, 1.0));
     }`;
@@ -582,20 +588,20 @@ export function mountHologram(root, { mode = "embed", stage: startStage = 0 } = 
 
   /* ---------------- Labels ---------------- */
   const LABELS = [
-    { t: "Front sheet · 3 mm polycarbonate", o: front, p: [3.7, 0, -3.3], s: [0, 5] },
-    { t: "36 × PERC half-cells", o: cellsG, p: [3.5, 0, 2.9], s: [0, 1] },
+    { t: "Front sheet · 3 mm polycarbonate", o: front, p: [3.2, 0, -2.9], s: [0, 5], call: true },
+    { t: "36 × PERC half-cells", o: cellsG, p: [2.6, 0, 2.2], s: [0, 1], call: true },
     { t: "Tabbing ribbon · 180 pcs", o: cellsG, p: [0.8, 0.02, rowZ(1) + 0.4], s: [2] },
     { t: "Series string · ≈ 24 V open-circuit", o: cellsG, p: [LEAD_X, 0.03, rowZ(0)], s: [3] },
-    { t: "Backing panel · aluminium composite", o: backing, p: [-3.7, 0, 3.3], s: [0] },
+    { t: "Backing panel · aluminium composite", o: backing, p: [-3.2, 0, 2.9], s: [0], call: true },
     { t: "790 mm", o: backing, p: [0.2, 0, HZ + 0.7], s: [0] },
     { t: "715 mm", o: backing, p: [HX + 0.7, 0, 0.2], s: [0] },
-    { t: "J-box · 2 × 15 A bypass diodes", o: jbox, p: [0.3, 0, 0.95], s: [0, 4] },
-    { t: "Aluminium frame · 25 mm angle", o: frameBars[1], p: [2.8, 0.15, 0], s: [0, 6] },
+    { t: "J-box · 2 × 15 A bypass diodes", o: jbox, p: [0, 0.15, 0], s: [0, 4], call: true },
+    { t: "Aluminium frame · 25 mm angle", o: frameBars[1], p: [2.8, 0.15, 0], s: [0, 6], call: true },
     { t: "≈ 1000 W/m² sunlight", o: scene, p: [SUN.x, SUN.y, SUN.z], s: [7], amber: true },
     { t: `Max power point · ${MPP.P.toFixed(0)} W @ ${MPP.V.toFixed(1)} V`, o: scene, p: [vx(MPP.V), py(MPP.P), CZ], s: [7], amber: true },
     { t: `I–V curve · Voc ${VOC.toFixed(1)} V`, o: scene, p: [CX0, CY1 - 0.4, CZ], s: [7] }
   ];
-  const labelLayer = $("[data-labels]");
+  const labelLayer = $("[data-labels]"), leaderLayer = $("[data-leaders]");
   LABELS.forEach((L) => {
     L.el = document.createElement("div");
     L.el.className = "holo-label" + (L.amber ? " amber" : "");
@@ -603,6 +609,12 @@ export function mountHologram(root, { mode = "embed", stage: startStage = 0 } = 
     L.el.setAttribute("aria-hidden", "true");
     labelLayer.append(L.el);
     L.v = new THREE.Vector3();
+    if (L.call) {
+      L.line = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      L.dot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      L.dot.setAttribute("r", "3");
+      leaderLayer.append(L.line, L.dot);
+    }
   });
 
   /* ---------------- State and choreography ---------------- */
@@ -816,18 +828,53 @@ export function mountHologram(root, { mode = "embed", stage: startStage = 0 } = 
     viEl.textContent = (MPP.V * Math.min(1, pw * 1.15)).toFixed(1) + " V · " + (MPP.I * pw).toFixed(2) + " A";
 
     const w = stageEl.clientWidth, h = stageEl.clientHeight;
+    const callouts = { left: [], right: [] };
     LABELS.forEach((L) => {
       L.v.set(...L.p);
       L.o.localToWorld(L.v);
       L.v.project(camera);
       const on = L.s.includes(stage) && L.o.visible !== false && L.v.z < 1 && (stage !== 7 || pw > 0.85 || !L.amber);
       const x = (L.v.x * 0.5 + 0.5) * w, y = (-L.v.y * 0.5 + 0.5) * h;
+      const asCallout = !!L.call && stage === 0 && w >= 560;
+      L.el.classList.toggle("call", asCallout);
+      if (L.line) {
+        L.line.style.opacity = asCallout && on ? 1 : 0;
+        L.dot.style.opacity = asCallout && on ? 1 : 0;
+      }
+      if (asCallout) {
+        L.ax = x; L.ay = y;
+        L.el.classList.remove("flip");
+        L.el.style.opacity = on ? 1 : 0;
+        if (on) callouts[x < w / 2 ? "left" : "right"].push(L);
+        return;
+      }
       const inside = x > 8 && x < w - 8 && y > 50 && y < h - 110;
       const flip = x > w * 0.58;
       L.el.classList.toggle("flip", flip);
       L.el.style.opacity = on && inside ? 1 : 0;
       L.el.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) translate(${flip ? "-100%" : "0"}, -50%)`;
     });
+    // Part names sit in columns at the sides, with leader lines back to each part
+    const TOP = 70, BOTTOM = h - 200, GAP = 40, EDGE = 18;
+    for (const side of ["left", "right"]) {
+      const list = callouts[side].sort((a, b) => a.ay - b.ay);
+      list.forEach((L, i) => { L.cy = Math.max(TOP, Math.min(BOTTOM, L.ay)); if (i) L.cy = Math.max(L.cy, list[i - 1].cy + GAP); });
+      for (let i = list.length - 1; i >= 0; i--) {
+        const limit = i === list.length - 1 ? BOTTOM : list[i + 1].cy - GAP;
+        if (list[i].cy > limit) list[i].cy = limit;
+      }
+      list.forEach((L) => {
+        const lw = L.el.offsetWidth, left = side === "left";
+        const edge = left ? EDGE + lw : w - EDGE - lw;
+        const elbow = left ? edge + 26 : edge - 26;
+        L.el.style.transform = left
+          ? `translate(${EDGE}px, ${L.cy.toFixed(1)}px) translateY(-50%)`
+          : `translate(${(w - EDGE).toFixed(1)}px, ${L.cy.toFixed(1)}px) translate(-100%, -50%)`;
+        L.line.setAttribute("d", `M${edge.toFixed(1)} ${L.cy.toFixed(1)} H${elbow.toFixed(1)} L${L.ax.toFixed(1)} ${L.ay.toFixed(1)}`);
+        L.dot.setAttribute("cx", L.ax.toFixed(1));
+        L.dot.setAttribute("cy", L.ay.toFixed(1));
+      });
+    }
 
     composer.render();
   }
