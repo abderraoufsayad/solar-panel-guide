@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Interactive WebGL hologram of a 36-cell solar module being built, stage by stage.">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Solar Module Hologram</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@125,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+  :root{color-scheme:dark}
+  html,body{height:100%}
+  body{background:#020B12;color:#BDF4FF;font-family:"JetBrains Mono",Consolas,monospace}
+  #holo{height:100%}
+  .boot{height:100%;display:grid;place-items:center;font-size:.8rem;letter-spacing:.08em;color:#5E8C99;padding-inline:16px;text-align:center}
+</style>
+
+</head>
+<body>
+<div id="holo"><div class="boot" id="boot">Loading hologram…</div></div>
+
+<script>
+  // Tell the viewer if the WebGL module can't load (offline or blocked CDN) instead of waiting forever.
+  setTimeout(function () {
+    var b = document.getElementById("boot");
+    if (b) b.textContent = "The 3D view couldn't load. Check your connection and reload.";
+  }, 15000);
+</script>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+<script type="module">
+  import { mountHologram } from "./hologram.js";
+  // Deep link to a stage: hologram.html#stage5 opens on stage 5
+  const m = location.hash.match(/^#stage([1-8])$/);
+  mountHologram(document.getElementById("holo"), { mode: "full", stage: m ? m[1] - 1 : 0 });
+</script>
+</body>
+</html>

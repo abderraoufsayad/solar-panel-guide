@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="A complete plan for hand-building and characterizing a 36-cell, 80 W solar panel as a university project.">
-<style>:root{color-scheme:light}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Hand-Built Solar Module</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -179,17 +179,54 @@ tr.off td{color:var(--muted)} tr.off td .nm{text-decoration:line-through}
 .resume li{margin:.55em 0}
 .ph{background:var(--accent-soft);color:var(--accent);font-family:var(--mono);font-size:.86em;padding:0 .25em;border-radius:3px}
 
+/* ---------- WebGL pieces ---------- */
+.hero-stage{position:relative;aspect-ratio:1/1;max-width:100%;width:100%;align-self:center}
+@media (max-width:759px){.hero-stage{aspect-ratio:4/3}}
+.hero-stage canvas{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:grab;touch-action:pan-y;outline:none}
+.hero-stage canvas:active{cursor:grabbing}
+.hero-stage canvas:focus-visible{outline:2px solid var(--accent);outline-offset:4px;border-radius:6px}
+.hero-hint{position:absolute;left:0;right:0;bottom:4px;text-align:center;font-family:var(--mono);font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);pointer-events:none;opacity:0;transition:opacity .6s}
+.hero-stage.is-live .hero-hint{opacity:1}
+.hero-fallback{position:absolute;inset:12% 8%;display:grid;place-items:center}
+.hero-stage.is-live .hero-fallback{display:none}
+.mini-panel{width:100%;aspect-ratio:790/715;border:5px solid #B9BEC5;border-radius:3px;background:var(--cell);
+  background-image:repeating-linear-gradient(90deg,transparent 0 calc(11.1% - 2px),#DDE2E7 calc(11.1% - 2px) 11.1%),repeating-linear-gradient(0deg,transparent 0 calc(25% - 3px),#DDE2E7 calc(25% - 3px) 25%);
+  box-shadow:0 24px 40px -24px rgba(10,20,40,.5);transform:perspective(900px) rotateX(24deg) rotateY(-18deg)}
+.holo-boot{aspect-ratio:16/10;display:grid;place-items:center;background:#020B12;color:#5E8C99;border-radius:8px;font-family:var(--mono);font-size:.8rem;letter-spacing:.06em;margin-top:1.2em}
+#holoEmbed{margin-top:1.2em}
+.design-intro{display:grid;gap:20px;grid-template-columns:1fr;align-items:start}
+@media (min-width:760px){.design-intro{grid-template-columns:minmax(0,1fr) minmax(0,330px)}}
+.design-intro p{margin-top:0}
+
+.viewtabs{display:flex;gap:4px;margin:4px 0 10px;border-bottom:1px solid var(--line)}
+.viewtabs button{font-family:var(--display);font-stretch:112%;font-size:.85rem;font-weight:600;color:var(--muted);background:none;border:0;border-bottom:2px solid transparent;margin-bottom:-1px;padding:6px 12px;cursor:pointer}
+.viewtabs button[aria-selected="true"]{color:var(--accent);border-bottom-color:var(--accent)}
+.viewtabs button:hover{color:var(--ink)}
+.surface{position:relative;aspect-ratio:16/10;max-width:100%;background:#06121C;border-radius:4px;overflow:hidden;color-scheme:dark}
+@media (max-width:640px){.surface{aspect-ratio:4/5}}
+.surface canvas{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:grab;touch-action:pan-y;outline:none}
+.surface canvas:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.surface-labels{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.surface-labels .sl{position:absolute;left:0;top:0;font-family:var(--mono);font-size:.68rem;color:#8FB9C9;white-space:nowrap;font-variant-numeric:tabular-nums}
+.surface-labels .sl.title{color:#DDF6FF;font-size:.72rem;letter-spacing:.04em}
+.surface-labels .sl.mpp{color:#FFB050;font-weight:600;text-shadow:0 0 8px rgba(255,176,80,.5)}
+.surface-msg{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--mono);font-size:.8rem;color:#5E8C99}
+.surface-key{position:absolute;left:12px;top:10px;display:flex;flex-wrap:wrap;gap:4px 14px;font-family:var(--mono);font-size:.68rem;color:#BFE3EE;pointer-events:none}
+.surface-key i{display:inline-block;width:14px;height:3px;border-radius:2px;margin-right:6px;vertical-align:middle}
+.surface-key .k-white{background:#fff}.surface-key .k-amber{background:#FFB050}
+
 footer{margin-top:64px;padding-top:18px;border-top:1px solid var(--line);font-size:.85rem;color:var(--muted)}
 
 @media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
 </style>
+
 </head>
 <body>
-
 <div class="shell">
   <nav class="toc" aria-label="Guide sections">
     <span class="eyebrow">Build guide</span>
     <ol>
+      <li><a href="#hologram">Build hologram</a></li>
       <li><a href="#overview">Scope</a></li>
       <li><a href="#physics">How a panel works</a></li>
       <li><a href="#design">Electrical design</a></li>
@@ -217,24 +254,21 @@ footer{margin-top:64px;padding-top:18px;border-top:1px solid var(--line);font-si
         <div><small>Build time</small><b>≈ 30 hours</b></div>
         <div><small>Skills</small><b>Solder · measure</b></div>
       </div>
-      <div class="strip" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
     </div>
-    <aside class="plate" aria-label="Design target nameplate">
-      <header><b>MODULE DESIGN TARGET</b><span>DIY-36M-HC</span></header>
-      <table>
-        <tr><td>Max power (P<sub>max</sub>)</td><td>75–85 W</td></tr>
-        <tr><td>Open-circuit voltage (V<sub>oc</sub>)</td><td>≈ 24 V</td></tr>
-        <tr><td>Short-circuit current (I<sub>sc</sub>)</td><td>≈ 4.7 A</td></tr>
-        <tr><td>Voltage at P<sub>max</sub> (V<sub>mp</sub>)</td><td>≈ 20 V</td></tr>
-        <tr><td>Current at P<sub>max</sub> (I<sub>mp</sub>)</td><td>≈ 4.3 A</td></tr>
-        <tr><td>Cells</td><td>36 half-cut mono, series</td></tr>
-        <tr><td>Bypass diodes</td><td>2 × 15 A Schottky</td></tr>
-        <tr><td>Size</td><td>≈ 790 × 715 mm</td></tr>
-      </table>
-      <p class="fine">Targets at STC: 1000 W/m², AM1.5 spectrum, 25 °C cell temperature. Based on 156.75 × 78.4 mm PERC half-cells; your cells' datasheet sets the real numbers.</p>
-      <div class="warn"><svg width="18" height="16" viewBox="0 0 18 16" aria-hidden="true"><path d="M9 1 17 15H1Z" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M9 6v4.5M9 12.2v1" stroke="currentColor" stroke-width="1.6"/></svg>Live whenever lit. Cover before wiring.</div>
-    </aside>
+    <div class="hero-stage" id="heroPanel">
+      <canvas tabindex="0" role="img" aria-label="3D render of the finished 36-cell solar module. Drag, or use the arrow keys, to turn it over and see the nameplate on the back."></canvas>
+      <div class="hero-fallback" aria-hidden="true"><div class="mini-panel"></div></div>
+      <span class="hero-hint">Drag to turn it over · nameplate on the back</span>
+    </div>
   </header>
+
+  <!-- ================= HOLOGRAM ================= -->
+  <section id="hologram">
+    <span class="eyebrow">Build hologram</span>
+    <h2>Watch the module assemble</h2>
+    <p>The whole build in eight stages, from bare cells to power on. Drag to orbit the hologram, or pick a stage to jump to it. There's also a <a href="https://abderraoufsayad.github.io/solar-panel-guide/hologram.html" target="_blank" rel="noopener">full-screen version</a>.</p>
+    <div id="holoEmbed"><div class="holo-boot">Loading the build hologram…</div></div>
+  </section>
 
   <!-- ================= SCOPE ================= -->
   <section id="overview">
@@ -290,7 +324,17 @@ footer{margin-top:64px;padding-top:18px;border-top:1px solid var(--line);font-si
           <input type="range" id="temp" min="0" max="75" step="5" value="25">
         </label>
       </div>
-      <div class="chartwrap"><svg id="ivchart" viewBox="0 0 640 330" role="img" aria-label="Current–voltage and power–voltage curves for the configured panel"></svg></div>
+      <div class="viewtabs" role="tablist" aria-label="Chart view">
+        <button type="button" role="tab" id="tab-curves" aria-selected="true" aria-controls="ivCurves">Curves</button>
+        <button type="button" role="tab" id="tab-surface" aria-selected="false" aria-controls="ivSurface">3D power surface</button>
+      </div>
+      <div class="chartwrap" id="ivCurves" role="tabpanel" aria-labelledby="tab-curves"><svg id="ivchart" viewBox="0 0 640 330" role="img" aria-label="Current–voltage and power–voltage curves for the configured panel"></svg></div>
+      <div class="surface" id="ivSurface" role="tabpanel" aria-labelledby="tab-surface" hidden>
+        <canvas tabindex="0" role="img" aria-label="3D surface of panel power against voltage and irradiance for the settings above. Drag to rotate."></canvas>
+        <div class="surface-labels" data-surface-labels aria-hidden="true"></div>
+        <div class="surface-msg" data-surface-msg>Loading 3D view…</div>
+        <div class="surface-key"><span><i class="k-white"></i>Power curve at your irradiance</span><span><i class="k-amber"></i>Max power point at every irradiance</span></div>
+      </div>
       <div class="readout" id="ivReadout"></div>
       <p class="muted" style="font-size:.84rem;margin-bottom:0">Single-diode model (ideality 1.2, small series resistance), typical PERC coefficients. Hand-built modules usually land 5–15% below the ideal because of front-sheet reflection and solder-joint resistance.</p>
     </div>
@@ -300,7 +344,24 @@ footer{margin-top:64px;padding-top:18px;border-top:1px solid var(--line);font-si
   <section id="design">
     <span class="eyebrow">Design</span>
     <h2>Electrical and mechanical design</h2>
-    <p>The reference design uses 156.75 × 78.4 mm half-cut mono PERC cells with <strong>3 to 5 busbars</strong>. Avoid 9-busbar and “MBB” multi-wire cells: their thin busbars are very hard to solder by hand. If you can only find 166 or 182 mm half-cells, the design still works. Set the explorer above to your cell to get the new current, power and size.</p>
+    <div class="design-intro">
+      <p>The reference design uses 156.75 × 78.4 mm half-cut mono PERC cells with <strong>3 to 5 busbars</strong>. Avoid 9-busbar and “MBB” multi-wire cells: their thin busbars are very hard to solder by hand. If you can only find 166 or 182 mm half-cells, the design still works. Set the explorer above to your cell to get the new current, power and size.</p>
+      <aside class="plate" aria-label="Design target nameplate">
+        <header><b>MODULE DESIGN TARGET</b><span>DIY-36M-HC</span></header>
+        <table>
+          <tr><td>Max power (P<sub>max</sub>)</td><td>75–85 W</td></tr>
+          <tr><td>Open-circuit voltage (V<sub>oc</sub>)</td><td>≈ 24 V</td></tr>
+          <tr><td>Short-circuit current (I<sub>sc</sub>)</td><td>≈ 4.7 A</td></tr>
+          <tr><td>Voltage at P<sub>max</sub> (V<sub>mp</sub>)</td><td>≈ 20 V</td></tr>
+          <tr><td>Current at P<sub>max</sub> (I<sub>mp</sub>)</td><td>≈ 4.0 A</td></tr>
+          <tr><td>Cells</td><td>36 half-cut mono, series</td></tr>
+          <tr><td>Bypass diodes</td><td>2 × 15 A Schottky</td></tr>
+          <tr><td>Size</td><td>≈ 790 × 715 mm</td></tr>
+        </table>
+        <p class="fine">Targets at STC: 1000 W/m², AM1.5 spectrum, 25 °C cell temperature. Based on 156.75 × 78.4 mm PERC half-cells; your cells' datasheet sets the real numbers.</p>
+        <div class="warn"><svg width="18" height="16" viewBox="0 0 18 16" aria-hidden="true"><path d="M9 1 17 15H1Z" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M9 6v4.5M9 12.2v1" stroke="currentColor" stroke-width="1.6"/></svg>Live whenever lit. Cover before wiring.</div>
+      </aside>
+    </div>
 
     <div class="tablewrap"><table class="data">
       <thead><tr><th>Parameter</th><th class="r">Per cell</th><th class="r">36 in series</th><th>Why it matters</th></tr></thead>
@@ -885,8 +946,29 @@ Cost per watt       $/W  = total cost / P_stc               compare with a comme
       d.append(s, b); return d;
     }));
   }
-  [ns, irr, temp, ctype].forEach(x => x.addEventListener("input", drawIV));
+  // Shared with the WebGL module (site3d.js), which draws the same model as a 3D surface
+  const ivParams = () => ({cellType: ctype.value, ns: +ns.value, irr: +irr.value, temp: +temp.value});
+  window.solarModel = {model, CELLS, params: ivParams};
+  [ns, irr, temp, ctype].forEach(x => x.addEventListener("input", () => {
+    drawIV();
+    dispatchEvent(new CustomEvent("ivchange", {detail: ivParams()}));
+  }));
   drawIV();
+
+  const viewTabs = [...document.querySelectorAll(".viewtabs [role=tab]")];
+  viewTabs.forEach(tab => tab.addEventListener("click", () => {
+    viewTabs.forEach(t => {
+      const on = t === tab;
+      t.setAttribute("aria-selected", on);
+      document.getElementById(t.getAttribute("aria-controls")).hidden = !on;
+    });
+    const view = tab.id === "tab-surface" ? "surface" : "curves";
+    dispatchEvent(new CustomEvent("ivview", {detail: view}));
+    if (view === "surface") setTimeout(() => {
+      const msg = document.querySelector("[data-surface-msg]");
+      if (msg && !msg.hidden) msg.textContent = "The 3D view couldn't load. Check your connection and reload.";
+    }, 15000);
+  }));
 
   /* ---------------- Layout diagram ---------------- */
   (function drawLayout(){
@@ -1023,7 +1105,12 @@ Cost per watt       $/W  = total cost / P_stc               compare with a comme
   onScroll();
 })();
 </script>
-
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+<script type="module" src="site3d.js"></script>
 </body>
 </html>
-
