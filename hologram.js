@@ -75,6 +75,9 @@ const CSS = `
 .holo .holo-leaders path{fill:none;stroke:var(--h-cyan);stroke-width:1;opacity:0;transition:opacity .5s;filter:drop-shadow(0 0 3px rgba(70,232,255,.8))}
 .holo .holo-leaders circle{fill:var(--h-bg);stroke:var(--h-cyan);stroke-width:1.5;opacity:0;transition:opacity .5s;filter:drop-shadow(0 0 4px rgba(70,232,255,.9))}
 .holo .holo-label.call{padding:6px 11px;border:1px solid rgba(70,232,255,.5);border-radius:2px;background:rgba(2,16,26,.78);box-shadow:0 0 14px -4px rgba(70,232,255,.45)}
+.holo .holo-leaders path.amber{stroke:var(--h-amber);filter:drop-shadow(0 0 3px rgba(255,179,92,.8))}
+.holo .holo-leaders circle.amber{stroke:var(--h-amber);filter:drop-shadow(0 0 4px rgba(255,179,92,.9))}
+.holo .holo-label.call.amber{border-color:rgba(255,179,92,.55);box-shadow:0 0 14px -4px rgba(255,179,92,.45)}
 .holo .holo-label.call::before,.holo .holo-label.call::after{display:none}
 .holo .holo-label.amber{color:var(--h-amber);text-shadow:0 0 6px rgba(255,179,92,.75)}
 .holo .holo-label::before{content:"";position:absolute;left:0;top:50%;width:14px;height:1px;background:currentColor;box-shadow:0 0 6px currentColor}
@@ -590,16 +593,16 @@ export function mountHologram(root, { mode = "embed", stage: startStage = 0 } = 
   const LABELS = [
     { t: "Front sheet · 3 mm polycarbonate", o: front, p: [3.2, 0, -2.9], s: [0, 5], call: true },
     { t: "36 × PERC half-cells", o: cellsG, p: [2.6, 0, 2.2], s: [0, 1], call: true },
-    { t: "Tabbing ribbon · 180 pcs", o: cellsG, p: [0.8, 0.02, rowZ(1) + 0.4], s: [2] },
-    { t: "Series string · ≈ 24 V open-circuit", o: cellsG, p: [LEAD_X, 0.03, rowZ(0)], s: [3] },
+    { t: "Tabbing ribbon · 180 pcs", o: cellsG, p: [0.8, 0.02, rowZ(1) + 0.4], s: [2], call: true },
+    { t: "Series string · ≈ 24 V open-circuit", o: cellsG, p: [LEAD_X, 0.03, rowZ(0)], s: [3], call: true },
     { t: "Backing panel · aluminium composite", o: backing, p: [-3.2, 0, 2.9], s: [0], call: true },
     { t: "790 mm", o: backing, p: [0.2, 0, HZ + 0.7], s: [0] },
     { t: "715 mm", o: backing, p: [HX + 0.7, 0, 0.2], s: [0] },
     { t: "J-box · 2 × 15 A bypass diodes", o: jbox, p: [0, 0.15, 0], s: [0, 4], call: true },
     { t: "Aluminium frame · 25 mm angle", o: frameBars[1], p: [2.8, 0.15, 0], s: [0, 6], call: true },
-    { t: "≈ 1000 W/m² sunlight", o: scene, p: [SUN.x, SUN.y, SUN.z], s: [7], amber: true },
-    { t: `Max power point · ${MPP.P.toFixed(0)} W @ ${MPP.V.toFixed(1)} V`, o: scene, p: [vx(MPP.V), py(MPP.P), CZ], s: [7], amber: true },
-    { t: `I–V curve · Voc ${VOC.toFixed(1)} V`, o: scene, p: [CX0, CY1 - 0.4, CZ], s: [7] }
+    { t: "≈ 1000 W/m² sunlight", o: scene, p: [SUN.x, SUN.y, SUN.z], s: [7], amber: true, call: true },
+    { t: `Max power point · ${MPP.P.toFixed(0)} W @ ${MPP.V.toFixed(1)} V`, o: scene, p: [vx(MPP.V), py(MPP.P), CZ], s: [7], amber: true, call: true },
+    { t: `I–V curve · Voc ${VOC.toFixed(1)} V`, o: scene, p: [CX0, CY1 - 0.4, CZ], s: [7], call: true }
   ];
   const labelLayer = $("[data-labels]"), leaderLayer = $("[data-leaders]");
   LABELS.forEach((L) => {
@@ -613,6 +616,7 @@ export function mountHologram(root, { mode = "embed", stage: startStage = 0 } = 
       L.line = document.createElementNS("http://www.w3.org/2000/svg", "path");
       L.dot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
       L.dot.setAttribute("r", "3");
+      if (L.amber) { L.line.classList.add("amber"); L.dot.classList.add("amber"); }
       leaderLayer.append(L.line, L.dot);
     }
   });
@@ -835,7 +839,7 @@ export function mountHologram(root, { mode = "embed", stage: startStage = 0 } = 
       L.v.project(camera);
       const on = L.s.includes(stage) && L.o.visible !== false && L.v.z < 1 && (stage !== 7 || pw > 0.85 || !L.amber);
       const x = (L.v.x * 0.5 + 0.5) * w, y = (-L.v.y * 0.5 + 0.5) * h;
-      const asCallout = !!L.call && stage === 0 && w >= 560;
+      const asCallout = !!L.call && w >= 560;
       L.el.classList.toggle("call", asCallout);
       if (L.line) {
         L.line.style.opacity = asCallout && on ? 1 : 0;
@@ -855,8 +859,9 @@ export function mountHologram(root, { mode = "embed", stage: startStage = 0 } = 
       L.el.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) translate(${flip ? "-100%" : "0"}, -50%)`;
     });
     // Part names sit in columns at the sides, with leader lines back to each part
-    const TOP = 70, BOTTOM = h - 200, GAP = 40, EDGE = 18;
+    const BOTTOM = h - 200, GAP = 40, EDGE = 18;
     for (const side of ["left", "right"]) {
+      const TOP = side === "right" && stage === 7 ? 165 : 88; // clear the power readout
       const list = callouts[side].sort((a, b) => a.ay - b.ay);
       list.forEach((L, i) => { L.cy = Math.max(TOP, Math.min(BOTTOM, L.ay)); if (i) L.cy = Math.max(L.cy, list[i - 1].cy + GAP); });
       for (let i = list.length - 1; i >= 0; i--) {
