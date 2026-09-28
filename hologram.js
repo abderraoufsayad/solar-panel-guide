@@ -94,6 +94,40 @@ const CSS = `
 .holo .holo-dots button span{display:block;height:5px;border-radius:3px;background:#12394A;transition:background .3s,box-shadow .3s}
 .holo .holo-dots button.done span{background:#1E6A80}
 .holo .holo-dots button.on span{background:var(--h-cyan);box-shadow:0 0 10px var(--h-cyan)}
+.holo .holo-zoom{display:flex;gap:6px}
+.holo .holo-zoom .holo-btn{width:34px;padding:6px 0;font-size:.95rem;line-height:1}
+.holo .holo-parts{flex-basis:100%;display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.holo .holo-parts span{font-size:.64rem;letter-spacing:.16em;text-transform:uppercase;color:var(--h-dim);margin-right:4px}
+.holo .holo-parts button{font-family:var(--h-mono);font-size:.66rem;letter-spacing:.08em;text-transform:uppercase;color:var(--h-ink);background:transparent;border:1px solid #16404F;border-radius:12px;padding:4px 10px;cursor:pointer}
+.holo .holo-parts button:hover{border-color:var(--h-cyan);color:var(--h-cyan)}
+.holo .holo-parts button[aria-pressed="true"]{background:rgba(70,232,255,.14);border-color:var(--h-cyan);color:var(--h-cyan)}
+.holo .holo-parts button:focus-visible{outline:2px solid var(--h-amber);outline-offset:2px}
+.holo .holo-label.call[data-part]{pointer-events:auto;cursor:pointer}
+.holo .holo-label.call[data-part]:hover{border-color:var(--h-cyan);background:rgba(8,38,51,.9)}
+.holo .holo-caption{transition:opacity .4s}
+.holo.is-inspecting .holo-caption{opacity:0}
+.holo .holo-inspect{position:absolute;z-index:4;top:12px;right:12px;bottom:12px;width:min(360px,42%);overflow:auto;padding:16px 18px 18px;
+  background:rgba(3,18,28,.88);border:1px solid rgba(70,232,255,.35);border-radius:6px;box-shadow:0 0 30px -8px rgba(70,232,255,.35);
+  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);transform:translateX(calc(100% + 24px));opacity:0;pointer-events:none;
+  transition:transform .55s cubic-bezier(.2,.8,.2,1),opacity .4s}
+.holo.is-inspecting .holo-inspect{transform:none;opacity:1;pointer-events:auto}
+@media (max-width:640px){
+  .holo .holo-inspect{left:10px;right:10px;top:auto;bottom:10px;width:auto;max-height:60%;transform:translateY(calc(100% + 24px))}
+}
+.holo .hi-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.holo .hi-k{font-size:.64rem;letter-spacing:.18em;text-transform:uppercase;color:var(--h-amber)}
+.holo .hi-x{background:none;border:1px solid #1B5566;border-radius:3px;color:var(--h-cyan);width:28px;height:28px;cursor:pointer;font-size:1rem;line-height:1}
+.holo .hi-x:hover{background:#082633}
+.holo .hi-x:focus-visible{outline:2px solid var(--h-amber);outline-offset:2px}
+.holo .hi-name{display:block;font-family:var(--h-display);font-stretch:125%;font-weight:800;font-size:1.45rem;line-height:1.1;margin:.35em 0 .15em;color:#EAFDFF;text-shadow:0 0 14px rgba(70,232,255,.45)}
+.holo .hi-role{display:block;font-size:.72rem;color:var(--h-cyan);letter-spacing:.04em}
+.holo .hi-specs{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;margin:14px 0 4px;padding:10px 0;border-top:1px solid #12394A;border-bottom:1px solid #12394A;font-size:.72rem}
+.holo .hi-specs dt{color:var(--h-dim);text-transform:uppercase;letter-spacing:.08em;font-size:.64rem;align-self:center}
+.holo .hi-specs dd{margin:0;color:#EAFDFF;text-align:right;font-variant-numeric:tabular-nums}
+.holo .holo-inspect h4{margin:14px 0 4px;font-size:.64rem;letter-spacing:.18em;text-transform:uppercase;color:var(--h-cyan);font-weight:600}
+.holo .holo-inspect p{margin:0;font-size:.8rem;line-height:1.6;color:var(--h-ink)}
+.holo .hi-nav{display:flex;justify-content:space-between;gap:8px;margin-top:16px}
+.holo .hi-back{width:100%;margin-top:8px;border-color:var(--h-cyan)}
 .holo .holo-fallback{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:24px 24px 140px;z-index:3;font-size:.8rem;letter-spacing:.06em;color:var(--h-dim)}
 `;
 
@@ -106,6 +140,42 @@ function injectCSS() {
 }
 
 const pad = (n) => String(n).padStart(2, "0");
+
+/* Parts you can click to inspect. view: camera centre [x, y, z], azimuth, polar angle, distance */
+const PARTS = [
+  { id: "front", name: "Front sheet", role: "3 mm UV-stabilised polycarbonate",
+    specs: [["Light through", "≈ 88–91%"], ["Thickness", "3 mm"], ["Cost", "$25–50"]],
+    does: "Shields the cells from rain, hail, dust and fingers while letting almost all of the sunlight through. It sits on butyl-tape spacers just above the cells.",
+    why: "Silicon cells are about 0.18 mm thick and crack under a light knock. The trade-off is optical: the air gap under the sheet adds two reflecting surfaces and costs roughly 8% of the power.",
+    view: { c: [0, 2.48, 0], az: 0.6, pol: 0.95, dist: 14 } },
+  { id: "cells", name: "Solar cells", role: "36 half-cut mono PERC, in series",
+    specs: [["Size", "156.75 × 78.4 mm"], ["Per cell", "0.675 V · 4.75 A"], ["String", "≈ 24 V open-circuit"]],
+    does: "Each cell turns light into about 0.6 V. Wired in series, 36 of them add up to ≈ 24 V open-circuit and ≈ 20 V at max power, enough to charge a 12 V battery even on a hot day.",
+    why: "Half-cut cells carry half the current of full cells, so less power is lost as heat in the ribbons. A series string runs at its weakest cell's current, which is why the guide sorts cells within ±3%.",
+    view: { c: [0, 0.96, 0], az: 0.3, pol: 0.7, dist: 12.5 } },
+  { id: "ribbons", name: "Tabbing and bus ribbon", role: "Tinned copper, 2 × 0.15 mm and 5 × 0.25 mm",
+    specs: [["Tabbing", "180 pieces"], ["Soldering", "≈ 340 °C, one stroke"], ["Leads out", "A · B · C"]],
+    does: "Tabbing ribbon runs along each cell's front busbars and onto the back of the next cell, joining them in series. Wider bus ribbon links the rows at the ends and brings three leads out to the junction box.",
+    why: "Every joint is a place to lose power or fail. Dull, cold joints raise resistance and lower the fill factor, and a single broken ribbon drops the whole string to zero.",
+    view: { c: [0, 0.96, 0], az: -0.35, pol: 0.55, dist: 9 }, state: { flow: 1 } },
+  { id: "backing", name: "Backing panel", role: "3 mm aluminium composite panel",
+    specs: [["Material", "ACM, painted"], ["Cells held by", "1 silicone dab each"], ["Cost", "$12–28 with film"]],
+    does: "Gives the sandwich its stiffness and seals it from behind. Each cell rests on it with a single dab of neutral-cure silicone, which lets the cells expand in the heat without cracking.",
+    why: "The skins are aluminium, so lay an insulating film (PET or backsheet) over the panel before the cells go down. No ribbon or lead should ever be able to touch bare metal.",
+    view: { c: [0, -1.05, 0], az: 0.9, pol: 1.05, dist: 14.5 } },
+  { id: "jbox", name: "Junction box", role: "IP65 box with 2 bypass diodes",
+    specs: [["Diodes", "2 × 15 A Schottky"], ["Each guards", "18 cells"], ["Output", "4 mm² cable, MC4"]],
+    does: "Collects the three leads from the cell string and connects them to the output cable. Inside, two bypass diodes each span half of the panel.",
+    why: "If part of the panel is shaded, a diode lets current flow around those 18 cells instead of through them. Without it, one shaded cell would limit the whole panel and could overheat into a hot spot.",
+    view: { c: [-2.9, -2.24, 0], az: 0.95, pol: 1.25, dist: 6.5 } },
+  { id: "frame", name: "Aluminium frame", role: "25 × 25 × 2 mm L-angle",
+    specs: [["Length", "≈ 3 m total"], ["Corners", "Mitred, riveted"], ["Cost", "$15–25"]],
+    does: "Clamps the front sheet, cells and backing into one rigid module and gives you something to bolt it down by.",
+    why: "It protects the fragile edges of the front sheet and stops the panel flexing, because flexing cracks cells. Bedded in silicone, the frame edge is the first line of defence against water.",
+    view: { c: [0, 0.03, 0], az: -0.6, pol: 0.95, dist: 15 }, state: { fin: 1, ex: 0.25 } }
+];
+const PART_INDEX = Object.fromEntries(PARTS.map((P, i) => [P.id, i]));
+const PICK_PRIORITY = ["jbox", "frame", "cells", "ribbons", "front", "backing"];
 
 /* Single-diode model of the 36-cell module (same model as the site's explorer) */
 function ivCurve(scaleToWatts) {
@@ -136,6 +206,16 @@ export function mountHologram(root, { mode = "embed", stage: startStage = 0 } = 
       <div class="holo-power" data-power>Output · hand-built target<b data-watts>0.0 W</b><span data-vi>0.0 V · 0.00 A</span></div>
       <svg class="holo-leaders" data-leaders aria-hidden="true"></svg>
       <div data-labels></div>
+      <aside class="holo-inspect" data-inspect aria-label="Part details" inert>
+        <div class="hi-top"><span class="hi-k" data-hi-k></span><button class="hi-x" type="button" data-hi-close aria-label="Close part details">×</button></div>
+        <strong class="hi-name" data-hi-name></strong>
+        <span class="hi-role" data-hi-role></span>
+        <dl class="hi-specs" data-hi-specs></dl>
+        <h4>What it does</h4><p data-hi-does></p>
+        <h4>Why it matters</h4><p data-hi-why></p>
+        <div class="hi-nav"><button class="holo-btn" type="button" data-hi-prev>‹ Prev part</button><button class="holo-btn" type="button" data-hi-next>Next part ›</button></div>
+        <button class="holo-btn hi-back" type="button" data-hi-close>Back to the build</button>
+      </aside>
       <div class="holo-caption" aria-live="polite"><div class="inner"><span class="n" data-n></span><strong class="holo-title" data-title></strong><p data-text></p></div></div>
       <div class="holo-fallback" data-fallback hidden></div>
     </div>
@@ -144,6 +224,8 @@ export function mountHologram(root, { mode = "embed", stage: startStage = 0 } = 
       <button class="holo-btn" type="button" data-play>Pause</button>
       <button class="holo-btn" type="button" data-next aria-label="Next stage">Next</button>
       <div class="holo-dots" data-dots role="group" aria-label="Build stages"></div>
+      <div class="holo-zoom"><button class="holo-btn" type="button" data-zoom-out aria-label="Zoom out">−</button><button class="holo-btn" type="button" data-zoom-in aria-label="Zoom in">+</button></div>
+      <div class="holo-parts" data-parts role="group" aria-label="Inspect a part"><span>Inspect</span></div>
     </div>`;
 
   const $ = (s) => root.querySelector(s);
@@ -167,7 +249,7 @@ export function mountHologram(root, { mode = "embed", stage: startStage = 0 } = 
     $("[data-n]").textContent = `${pad(stage + 1)} / ${pad(STAGES.length)}`;
     $("[data-title]").textContent = st.t;
     $("[data-text]").textContent = st.d;
-    $("[data-meta]").innerHTML = `Stage ${pad(stage + 1)} / ${pad(STAGES.length)}<br><span class="dim">Drag to rotate</span>`;
+    $("[data-meta]").innerHTML = `Stage ${pad(stage + 1)} / ${pad(STAGES.length)}<br><span class="dim">Drag to rotate · click a part</span>`;
     dots.forEach((d, i) => {
       d.classList.toggle("on", i === stage);
       d.classList.toggle("done", i < stage);
@@ -175,8 +257,10 @@ export function mountHologram(root, { mode = "embed", stage: startStage = 0 } = 
     });
     playBtn.textContent = playing ? "Pause" : "Play";
   }
-  let onStage = () => {};
+  let onStage = () => {}, leaveInspect = () => {}, openPart = () => {}, zoomBy = () => {};
+  let inspect = null;
   function go(i, byUser, instant = false) {
+    if (inspect !== null) leaveInspect(false);
     stage = (i + STAGES.length) % STAGES.length;
     stageClock = 0;
     if (byUser && reduce) playing = false;
@@ -185,9 +269,29 @@ export function mountHologram(root, { mode = "embed", stage: startStage = 0 } = 
   }
   $("[data-prev]").addEventListener("click", () => go(stage - 1, true));
   $("[data-next]").addEventListener("click", () => go(stage + 1, true));
-  playBtn.addEventListener("click", () => { playing = !playing; stageClock = 0; caption(); });
+  playBtn.addEventListener("click", () => {
+    if (inspect !== null) { leaveInspect(true); playing = true; caption(); return; }
+    playing = !playing; stageClock = 0; caption();
+  });
+  $("[data-zoom-in]").addEventListener("click", () => zoomBy(0.8));
+  $("[data-zoom-out]").addEventListener("click", () => zoomBy(1.25));
+  const partBtns = PARTS.map((P, i) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.textContent = P.name;
+    b.setAttribute("aria-pressed", "false");
+    b.addEventListener("click", () => (inspect === i ? leaveInspect(true) : openPart(i)));
+    $("[data-parts]").append(b);
+    return b;
+  });
+  root.querySelectorAll("[data-hi-close]").forEach((b) => b.addEventListener("click", () => leaveInspect(true)));
+  $("[data-hi-prev]").addEventListener("click", () => openPart((inspect + PARTS.length - 1) % PARTS.length));
+  $("[data-hi-next]").addEventListener("click", () => openPart((inspect + 1) % PARTS.length));
   root.addEventListener("keydown", (e) => {
     if (e.target.closest("button") && e.key === " ") return;
+    if (e.key === "Escape" && inspect !== null) { leaveInspect(true); e.preventDefault(); return; }
+    if (e.key === "+" || e.key === "=") { zoomBy(0.8); e.preventDefault(); return; }
+    if (e.key === "-" || e.key === "_") { zoomBy(1.25); e.preventDefault(); return; }
     if (e.key === "ArrowRight") { go(stage + 1, true); e.preventDefault(); }
     else if (e.key === "ArrowLeft") { go(stage - 1, true); e.preventDefault(); }
     else if (e.key === " " && e.target === canvas) { playing = !playing; caption(); e.preventDefault(); }
@@ -217,7 +321,10 @@ export function mountHologram(root, { mode = "embed", stage: startStage = 0 } = 
   controls.enableDamping = true;
   controls.dampingFactor = 0.07;
   controls.enablePan = false;
-  controls.enableZoom = false;
+  controls.enableZoom = mode === "full"; // embedded in the site, the wheel keeps scrolling the page
+  controls.zoomSpeed = 0.7;
+  controls.minDistance = 4;
+  controls.maxDistance = 48;
   controls.rotateSpeed = 0.55;
   controls.minPolarAngle = 0.15;
   controls.maxPolarAngle = 2.25;
@@ -309,6 +416,10 @@ export function mountHologram(root, { mode = "embed", stage: startStage = 0 } = 
     const lm = grp.userData.edges.material;
     lm.opacity = lm.userData.base * v * shared.uFlick.value;
     (grp.userData.extra || []).forEach((x) => setVis(x, v));
+  }
+  function setPulse(grp, p) {
+    grp.userData.mesh.material.uniforms.uPulse.value = p;
+    (grp.userData.extra || []).forEach((x) => setPulse(x, p));
   }
   function fadeLine(obj, v) {
     obj.visible = v > 0.004;
@@ -591,15 +702,15 @@ export function mountHologram(root, { mode = "embed", stage: startStage = 0 } = 
 
   /* ---------------- Labels ---------------- */
   const LABELS = [
-    { t: "Front sheet · 3 mm polycarbonate", o: front, p: [3.2, 0, -2.9], s: [0, 5], call: true },
-    { t: "36 × PERC half-cells", o: cellsG, p: [2.6, 0, 2.2], s: [0, 1], call: true },
-    { t: "Tabbing ribbon · 180 pcs", o: cellsG, p: [0.8, 0.02, rowZ(1) + 0.4], s: [2], call: true },
-    { t: "Series string · ≈ 24 V open-circuit", o: cellsG, p: [LEAD_X, 0.03, rowZ(0)], s: [3], call: true },
-    { t: "Backing panel · aluminium composite", o: backing, p: [-3.2, 0, 2.9], s: [0], call: true },
+    { t: "Front sheet · 3 mm polycarbonate", o: front, p: [3.2, 0, -2.9], s: [0, 5], call: true, part: "front" },
+    { t: "36 × PERC half-cells", o: cellsG, p: [2.6, 0, 2.2], s: [0, 1], call: true, part: "cells" },
+    { t: "Tabbing ribbon · 180 pcs", o: cellsG, p: [0.8, 0.02, rowZ(1) + 0.4], s: [2], call: true, part: "ribbons" },
+    { t: "Series string · ≈ 24 V open-circuit", o: cellsG, p: [LEAD_X, 0.03, rowZ(0)], s: [3], call: true, part: "ribbons" },
+    { t: "Backing panel · aluminium composite", o: backing, p: [-3.2, 0, 2.9], s: [0], call: true, part: "backing" },
     { t: "790 mm", o: backing, p: [0.2, 0, HZ + 0.7], s: [0] },
     { t: "715 mm", o: backing, p: [HX + 0.7, 0, 0.2], s: [0] },
-    { t: "J-box · 2 × 15 A bypass diodes", o: jbox, p: [0, 0.15, 0], s: [0, 4], call: true },
-    { t: "Aluminium frame · 25 mm angle", o: frameBars[1], p: [2.8, 0.15, 0], s: [0, 6], call: true },
+    { t: "J-box · 2 × 15 A bypass diodes", o: jbox, p: [0, 0.15, 0], s: [0, 4], call: true, part: "jbox" },
+    { t: "Aluminium frame · 25 mm angle", o: frameBars[1], p: [2.8, 0.15, 0], s: [0, 6], call: true, part: "frame" },
     { t: "≈ 1000 W/m² sunlight", o: scene, p: [SUN.x, SUN.y, SUN.z], s: [7], amber: true, call: true },
     { t: `Max power point · ${MPP.P.toFixed(0)} W @ ${MPP.V.toFixed(1)} V`, o: scene, p: [vx(MPP.V), py(MPP.P), CZ], s: [7], amber: true, call: true },
     { t: `I–V curve · Voc ${VOC.toFixed(1)} V`, o: scene, p: [CX0, CY1 - 0.4, CZ], s: [7], call: true }
@@ -610,6 +721,10 @@ export function mountHologram(root, { mode = "embed", stage: startStage = 0 } = 
     L.el.className = "holo-label" + (L.amber ? " amber" : "");
     L.el.textContent = L.t;
     L.el.setAttribute("aria-hidden", "true");
+    if (L.part) {
+      L.el.dataset.part = L.part;
+      L.el.addEventListener("click", () => openPart(PART_INDEX[L.part]));
+    }
     labelLayer.append(L.el);
     L.v = new THREE.Vector3();
     if (L.call) {
@@ -625,16 +740,92 @@ export function mountHologram(root, { mode = "embed", stage: startStage = 0 } = 
   const cur = {}, tgt = {};
   K.forEach((k, i) => { cur[k] = tgt[k] = STAGES[0].s[i]; });
   cur.dim = tgt.dim = 1;
-  let flick = 0;
+  let flick = 0, viewOff = 0;
+  const mul = { front: 1, cells: 1, ribbons: 1, backing: 1, jbox: 1, frame: 1, fx: 1 };
   const sph = new THREE.Spherical();
-  let camAnim = null, idleHold = 0, sizeMul = 1;
+  let camAnim = null, zoomAnim = null, idleHold = 0, sizeMul = 1, userZoom = 1, viewBase = 20, resumePlay = false, hovered = null;
+  const HOME = new THREE.Vector3(0, -0.2, 0);
+  const ZMIN = 0.45, ZMAX = 1.9;
 
-  const camFor = (i) => { const [az, pol, dist] = STAGES[i].cam; return { az, pol, dist: dist * sizeMul }; };
+  // Camera view for the current stage, or for the part being inspected
+  function viewFor() {
+    if (inspect !== null) {
+      const v = PARTS[inspect].view;
+      return { az: v.az, pol: v.pol, base: v.dist * sizeMul, target: new THREE.Vector3(...v.c) };
+    }
+    const [az, pol, dist] = STAGES[stage].cam;
+    return { az, pol, base: dist * sizeMul, target: HOME };
+  }
+  const camFor = () => { const v = viewFor(); return { az: v.az, pol: v.pol, dist: v.base * userZoom }; };
   function placeCam(v) {
     sph.set(v.dist, v.pol, v.az);
     camera.position.setFromSpherical(sph).add(controls.target);
     camera.lookAt(controls.target);
   }
+  function flyTo(snap) {
+    const v = viewFor();
+    viewBase = v.base;
+    sph.setFromVector3(camera.position.clone().sub(controls.target));
+    let dAz = v.az - sph.theta;
+    dAz = Math.atan2(Math.sin(dAz), Math.cos(dAz));
+    camAnim = {
+      from: { az: sph.theta, pol: sph.phi, dist: sph.radius },
+      to: { az: sph.theta + dAz, pol: v.pol, dist: v.base * userZoom },
+      tFrom: controls.target.clone(), tTo: v.target.clone(), t: 0
+    };
+    zoomAnim = null;
+    if (snap) { controls.target.copy(v.target); placeCam({ az: v.az, pol: v.pol, dist: v.base * userZoom }); camAnim = null; }
+  }
+  zoomBy = (f) => {
+    userZoom = THREE.MathUtils.clamp(userZoom * f, ZMIN, ZMAX);
+    if (camAnim) { camAnim.to.dist = viewBase * userZoom; return; }
+    zoomAnim = { from: camera.position.distanceTo(controls.target), to: viewBase * userZoom, t: reduce ? 1 : 0 };
+    idleHold = Math.max(idleHold, 3);
+  };
+  controls.addEventListener("end", () => {
+    if (!camAnim) userZoom = THREE.MathUtils.clamp(camera.position.distanceTo(controls.target) / viewBase, ZMIN, ZMAX);
+  });
+
+  const inspectEl = $("[data-inspect]");
+  function fillPanel(i) {
+    const P = PARTS[i];
+    $("[data-hi-k]").textContent = `Part ${pad(i + 1)} / ${pad(PARTS.length)}`;
+    $("[data-hi-name]").textContent = P.name;
+    $("[data-hi-role]").textContent = P.role;
+    $("[data-hi-specs]").replaceChildren(...P.specs.flatMap(([k, v]) => {
+      const dt = document.createElement("dt"); dt.textContent = k;
+      const dd = document.createElement("dd"); dd.textContent = v;
+      return [dt, dd];
+    }));
+    $("[data-hi-does]").textContent = P.does;
+    $("[data-hi-why]").textContent = P.why;
+  }
+  const markParts = () => partBtns.forEach((b, i) => b.setAttribute("aria-pressed", String(i === inspect)));
+  openPart = (i) => {
+    if (inspect === null) resumePlay = playing;
+    playing = false;
+    inspect = i;
+    const INSPECT = [1, 1, 1, 0, 1, 1, 1, 0, 0, 0];
+    K.forEach((k, j) => { tgt[k] = INSPECT[j]; });
+    Object.assign(tgt, PARTS[i].state || {});
+    tgt.dim = PARTS[i].id === "backing" ? 1 : 0;
+    fillPanel(i);
+    root.classList.add("is-inspecting");
+    inspectEl.inert = false;
+    markParts();
+    caption();
+    flyTo(reduce);
+    if (reduce) { K.forEach((k) => { cur[k] = tgt[k]; }); cur.dim = tgt.dim; }
+    flick = reduce ? 0 : 0.16;
+  };
+  leaveInspect = (restore) => {
+    if (inspect === null) return;
+    inspect = null;
+    root.classList.remove("is-inspecting");
+    inspectEl.inert = true;
+    markParts();
+    if (restore) { playing = resumePlay; stageClock = 0; caption(); onStage(stage); }
+  };
   onStage = (i, instant) => {
     const snap = reduce || instant;
     const st = STAGES[i];
@@ -642,12 +833,8 @@ export function mountHologram(root, { mode = "embed", stage: startStage = 0 } = 
     tgt.dim = i === 0 ? 1 : 0;
     if (st.enter) Object.assign(cur, st.enter);
     if (i === 7) cur.power = 0;
-    sph.setFromVector3(camera.position.clone().sub(controls.target));
-    const to = camFor(i);
-    let dAz = to.az - sph.theta;
-    dAz = Math.atan2(Math.sin(dAz), Math.cos(dAz));
-    camAnim = { from: { az: sph.theta, pol: sph.phi, dist: sph.radius }, to: { az: sph.theta + dAz, pol: to.pol, dist: to.dist }, t: snap ? 1 : 0 };
-    if (snap) { K.forEach((k) => { cur[k] = tgt[k]; }); cur.dim = tgt.dim; placeCam(to); camAnim = null; }
+    flyTo(snap);
+    if (snap) { K.forEach((k) => { cur[k] = tgt[k]; }); cur.dim = tgt.dim; }
     scanT = snap ? 1 : 0;
     flick = snap ? 0 : 0.28;
   };
@@ -667,12 +854,51 @@ export function mountHologram(root, { mode = "embed", stage: startStage = 0 } = 
     lineMats.forEach((m) => m.resolution.set(w, h));
     pointScale.value = (h * pr) / (2 * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)));
     const mul = w / h < 0.9 ? 1.55 : w / h < 1.3 ? 1.2 : 1;
-    if (mul !== sizeMul) { sizeMul = mul; if (!camAnim) placeCam(camFor(stage)); }
+    if (mul !== sizeMul) { sizeMul = mul; viewBase = viewFor().base; if (!camAnim) placeCam(camFor()); }
   }
   new ResizeObserver(resize).observe(stageEl);
   resize();
-  placeCam(camFor(0));
+  controls.target.copy(HOME);
+  placeCam(camFor());
   controls.update();
+
+  /* ---------------- Picking: hover and click a part ---------------- */
+  const pickables = [];
+  const register = (obj, id) => obj.traverse((o) => { if (o.isMesh && !o.isLineSegments2 && !o.isLine2) { o.userData.part = id; pickables.push(o); } });
+  register(front, "front"); register(backing, "backing"); register(jbox, "jbox");
+  cells.forEach((c) => register(c, "cells"));
+  frameBars.forEach((b) => register(b, "frame"));
+  const raycaster = new THREE.Raycaster(), ndc = new THREE.Vector2();
+  const shown = (o) => { for (let n = o; n; n = n.parent) if (!n.visible) return false; return true; };
+  function pickAt(clientX, clientY) {
+    const r = canvas.getBoundingClientRect();
+    ndc.set(((clientX - r.left) / r.width) * 2 - 1, -((clientY - r.top) / r.height) * 2 + 1);
+    raycaster.setFromCamera(ndc, camera);
+    let best = null;
+    for (const h of raycaster.intersectObjects(pickables, false)) {
+      if (!shown(h.object)) continue;
+      const id = h.object.userData.part;
+      if (best === null || PICK_PRIORITY.indexOf(id) < PICK_PRIORITY.indexOf(best)) best = id;
+    }
+    return best;
+  }
+  let down = null;
+  canvas.addEventListener("pointerdown", (e) => { down = { x: e.clientX, y: e.clientY, t: performance.now() }; });
+  canvas.addEventListener("pointerup", (e) => {
+    if (!down) return;
+    const moved = Math.hypot(e.clientX - down.x, e.clientY - down.y), quick = performance.now() - down.t < 500;
+    down = null;
+    if (moved > 6 || !quick) return;
+    const id = pickAt(e.clientX, e.clientY);
+    if (id) openPart(PART_INDEX[id]);
+    else if (inspect !== null) leaveInspect(true);
+  });
+  canvas.addEventListener("pointermove", (e) => {
+    if (e.buttons) return;
+    hovered = pickAt(e.clientX, e.clientY);
+    canvas.style.cursor = hovered ? "pointer" : "";
+  });
+  canvas.addEventListener("pointerleave", () => { hovered = null; canvas.style.cursor = ""; });
 
   /* ---------------- Frame loop ---------------- */
   const ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
@@ -693,7 +919,7 @@ export function mountHologram(root, { mode = "embed", stage: startStage = 0 } = 
     shared.uTime.value = time;
     lens.uniforms.uTime.value = time % 10;
 
-    if (playing && idleHold <= 0) {
+    if (playing && idleHold <= 0 && inspect === null) {
       stageClock += dt;
       if (stageClock > STAGES[stage].dur) go(stage + 1, false);
     }
@@ -709,37 +935,56 @@ export function mountHologram(root, { mode = "embed", stage: startStage = 0 } = 
     linear("power", 0.45, dt);
 
     if (camAnim) {
-      camAnim.t = Math.min(1, camAnim.t + dt / 2.0);
+      camAnim.t = Math.min(1, camAnim.t + dt / 1.8);
       const e = ease(camAnim.t), f = camAnim.from, t2 = camAnim.to;
+      controls.target.lerpVectors(camAnim.tFrom, camAnim.tTo, e);
       placeCam({ az: f.az + (t2.az - f.az) * e, pol: f.pol + (t2.pol - f.pol) * e, dist: f.dist + (t2.dist - f.dist) * e });
       if (camAnim.t >= 1) camAnim = null;
+    } else if (zoomAnim) {
+      zoomAnim.t = Math.min(1, zoomAnim.t + dt / 0.5);
+      const r = zoomAnim.from + (zoomAnim.to - zoomAnim.from) * ease(zoomAnim.t);
+      camera.position.sub(controls.target).setLength(r).add(controls.target);
+      if (zoomAnim.t >= 1) zoomAnim = null;
     }
+
+    // isolation: the inspected part stays lit, everything else fades back
+    for (const id of Object.keys(mul)) {
+      const goal = inspect === null ? 1 : id === "fx" ? 0 : id === PARTS[inspect].id ? 1 : 0.06;
+      mul[id] += (goal - mul[id]) * (1 - Math.exp(-4 * dt));
+    }
+    const hp = (id) => (hovered === id ? 0.35 : 0);
+    // slide the scene left (up on phones) to make room for the part panel
+    const w0 = stageEl.clientWidth, h0 = stageEl.clientHeight, narrow = w0 < 640;
+    viewOff += ((inspect === null ? 0 : 1) - viewOff) * (1 - Math.exp(-4 * dt));
+    if (viewOff > 0.002) camera.setViewOffset(w0, h0, narrow ? 0 : viewOff * w0 * 0.2, narrow ? viewOff * h0 * 0.2 : 0, w0, h0);
+    else if (camera.view && camera.view.enabled) camera.clearViewOffset();
     controls.autoRotate = !reduce && !camAnim && idleHold <= 0;
     controls.update();
 
     const ex = cur.ex;
     backing.position.y = -1.05 * ex;
-    setVis(backing, 0.9);
-    fadeLine(dims, cur.dim);
+    setVis(backing, 0.9 * mul.backing);
+    setPulse(backing, hp("backing"));
+    fadeLine(dims, cur.dim * mul.backing);
 
     cellsG.position.y = 0.06 + 0.9 * ex;
     const glow = cur.sun * 0.85;
     cells.forEach((cell, i) => {
       const v = clamp01(cur.cells * 36 - i);
       cell.position.y = (1 - v) * 0.8;
-      setVis(cell, v);
+      setVis(cell, v * mul.cells);
       const u = cell.userData.mesh.material.uniforms;
       u.uGlow.value = glow;
-      u.uPulse.value = v > 0 && v < 1 ? Math.sin(v * Math.PI) : 0;
+      u.uPulse.value = Math.max(v > 0 && v < 1 ? Math.sin(v * Math.PI) : 0, hp("cells"));
     });
 
     ribbons.forEach((line, r) => {
       const rp = clamp01(cur.rib * 4 - r);
       line.scale.x = Math.max(rp, 1e-4);
       line.position.x = line.userData.dir * (RIB_L / 2) * (1 - rp);
-      fadeLine(line, rp > 0 ? 1 : 0);
+      fadeLine(line, (rp > 0 ? 1 : 0) * mul.ribbons);
     });
-    fadeLine(bus, clamp01((cur.rib - 0.8) * 5));
+    fadeLine(bus, clamp01((cur.rib - 0.8) * 5) * mul.ribbons);
 
     // soldering head rides the growing ribbon front
     const soldering = cur.rib > 0.001 && cur.rib < 0.999 && tgt.rib === 1;
@@ -769,9 +1014,9 @@ export function mountHologram(root, { mode = "embed", stage: startStage = 0 } = 
     sparks.g.attributes.position.needsUpdate = true;
     sparks.g.attributes.aSize.needsUpdate = true;
 
-    fadeLine(flowLine, cur.flow);
+    fadeLine(flowLine, cur.flow * mul.ribbons);
     flow.p.visible = cur.flow > 0.004;
-    flow.p.material.uniforms.uOpacity.value = cur.flow * (0.75 + cur.sun * 0.5);
+    flow.p.material.uniforms.uOpacity.value = cur.flow * (0.75 + cur.sun * 0.5) * mul.ribbons;
     if (flow.p.visible) {
       const speed = 0.9 + cur.sun * 1.4;
       for (let i = 0; i < N_FLOW; i++) {
@@ -783,25 +1028,29 @@ export function mountHologram(root, { mode = "embed", stage: startStage = 0 } = 
     }
 
     jbox.position.set(-2.9, -0.24 - 2.0 * ex - (1 - cur.jb) * 1.4, 0);
-    setVis(jbox, cur.jb);
-    fadeLine(leads, cur.jb);
-    diodes.forEach((d, i) => { d.userData.mesh.material.uniforms.uPulse.value = stage === 4 ? 0.5 + 0.5 * Math.sin(time * 4 + i * Math.PI) : 0; });
+    setVis(jbox, cur.jb * mul.jbox);
+    setPulse(jbox, hp("jbox"));
+    fadeLine(leads, cur.jb * mul.jbox);
+    const diodeBeat = stage === 4 || (inspect !== null && PARTS[inspect].id === "jbox");
+    diodes.forEach((d, i) => { d.userData.mesh.material.uniforms.uPulse.value = Math.max(diodeBeat ? 0.5 + 0.5 * Math.sin(time * 4 + i * Math.PI) : 0, hp("jbox")); });
 
     front.position.y = 0.13 + 2.35 * ex + (1 - cur.front) * 2.4;
-    setVis(front, cur.front);
+    setVis(front, cur.front * mul.front);
+    setPulse(front, hp("front"));
 
     frameBars.forEach((bar) => {
       bar.position.copy(bar.userData.home).addScaledVector(bar.userData.dir, (1 - cur.fin) * 2.4);
-      setVis(bar, cur.fv);
+      setVis(bar, cur.fv * mul.frame);
+      setPulse(bar, hp("frame"));
     });
 
     sun.p.visible = cur.sun > 0.004;
-    sun.p.material.uniforms.uOpacity.value = cur.sun * (0.85 + 0.15 * Math.sin(time * 2.1));
-    fadeLine(rays, cur.sun * (0.55 + 0.45 * Math.sin(time * 3.3)));
+    sun.p.material.uniforms.uOpacity.value = cur.sun * (0.85 + 0.15 * Math.sin(time * 2.1)) * mul.fx;
+    fadeLine(rays, cur.sun * (0.55 + 0.45 * Math.sin(time * 3.3)) * mul.fx);
 
     // floating I–V curve draws itself as power comes up
     const pw = ease(clamp01(cur.power));
-    const curveOn = cur.sun;
+    const curveOn = cur.sun * mul.fx;
     fadeLine(axes, curveOn);
     fadeLine(ivLine, curveOn);
     fadeLine(pvLine, curveOn);
@@ -827,7 +1076,7 @@ export function mountHologram(root, { mode = "embed", stage: startStage = 0 } = 
     dust.g.attributes.position.needsUpdate = true;
     disc.rotation.z = time * 0.02;
 
-    powerEl.style.opacity = cur.power > 0.01 && stage === 7 ? 1 : 0;
+    powerEl.style.opacity = cur.power > 0.01 && stage === 7 && inspect === null ? 1 : 0;
     wattsEl.textContent = (MPP.P * pw).toFixed(1) + " W";
     viEl.textContent = (MPP.V * Math.min(1, pw * 1.15)).toFixed(1) + " V · " + (MPP.I * pw).toFixed(2) + " A";
 
@@ -837,7 +1086,7 @@ export function mountHologram(root, { mode = "embed", stage: startStage = 0 } = 
       L.v.set(...L.p);
       L.o.localToWorld(L.v);
       L.v.project(camera);
-      const on = L.s.includes(stage) && L.o.visible !== false && L.v.z < 1 && (stage !== 7 || pw > 0.85 || !L.amber);
+      const on = inspect === null && L.s.includes(stage) && L.o.visible !== false && L.v.z < 1 && (stage !== 7 || pw > 0.85 || !L.amber);
       const x = (L.v.x * 0.5 + 0.5) * w, y = (-L.v.y * 0.5 + 0.5) * h;
       const asCallout = !!L.call && w >= 560;
       L.el.classList.toggle("call", asCallout);
